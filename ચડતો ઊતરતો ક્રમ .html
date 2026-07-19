@@ -1,0 +1,299 @@
+html_content = """<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ચડતો અને ઊતરતો ક્રમ - રમત (મિશ્ર પ્રશ્નો)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e8f5e9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .game-box {
+            background-color: #ffffff;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 650px;
+            text-align: center;
+        }
+        h2 {
+            color: #2e7d32;
+            border-bottom: 2px solid #a5d6a7;
+            padding-bottom: 10px;
+        }
+        .instruction {
+            font-size: 22px;
+            color: #d84315;
+            font-weight: bold;
+            margin-bottom: 20px;
+            background: #ffe0b2;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .number-btn {
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            margin: 8px;
+            font-size: 22px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .number-btn:hover { background-color: #1565c0; }
+        .number-btn:active { transform: scale(0.95); }
+        .number-btn.disabled {
+            background-color: #90caf9;
+            cursor: not-allowed;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        .answer-area {
+            min-height: 80px;
+            border: 3px dashed #78909c;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            background-color: #f5f5f5;
+        }
+        .answer-btn {
+            background-color: #388e3c;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            margin: 5px;
+            font-size: 22px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .answer-btn:hover { background-color: #2e7d32; }
+        .controls {
+            margin-top: 20px;
+        }
+        .submit-btn {
+            background-color: #f57c00;
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            font-size: 22px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .submit-btn:hover { background-color: #e65100; }
+        .message {
+            margin-top: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            min-height: 30px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .correct { color: #1b5e20; background-color: #c8e6c9; }
+        .wrong { color: #b71c1c; background-color: #ffcdd2; }
+        .footer {
+            margin-top: 30px;
+            font-size: 20px;
+            color: #37474f;
+            font-weight: bold;
+            text-align: center;
+            background: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            line-height: 1.5;
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="game-box" id="game-screen">
+    <h2>પ્રશ્ન <span id="current-q">1</span> / 20</h2>
+    <div class="instruction" id="instruction-text"></div>
+
+    <div id="source-area"></div>
+
+    <p style="color: #607d8b; font-size: 18px; margin-bottom: 5px; font-weight: bold;">(જવાબ પસંદ કરવા માટે ઉપરની સંખ્યાઓ પર ક્લિક કરો)</p>
+    <div class="answer-area" id="answer-area"></div>
+
+    <div class="message" id="msg-box"></div>
+
+    <div class="controls">
+        <button class="submit-btn" id="check-btn" onclick="checkAnswer()">જવાબ ચકાસો</button>
+    </div>
+</div>
+
+<div class="game-box hidden" id="result-screen">
+    <h2>રમત પૂરી થઈ! 🏆</h2>
+    <h1 style="color: #2e7d32; font-size: 45px;">તમારો સ્કોર: <span id="final-score"></span> / 20</h1>
+    <button class="submit-btn" onclick="location.reload()" style="margin-top: 20px;">ફરીથી રમો</button>
+</div>
+
+<div class="footer">
+    created by: વિજયકુમાર ચાવડા<br>
+    શાળા:દાદાના મુવાડા પ્રા. શાળા
+</div>
+
+<script>
+    // ધોરણ 6 થી 8 ના વિદ્યાર્થીઓ માટે સહેલા, મધ્યમ અને અઘરા પ્રશ્નોનું મિશ્રણ
+    const allQuestions = [
+        // સહેલા પ્રશ્નો (Easy - 3 થી 4 અંકો)
+        { type: 'asc', nums: [420, 150, 310, 280] },
+        { type: 'asc', nums: [1234, 4321, 2143, 3412] },
+        { type: 'desc', nums: [900, 500, 700, 300] },
+        { type: 'desc', nums: [5555, 2222, 8888, 1111] },
+        { type: 'asc', nums: [3040, 1020, 5060, 2010] },
+        { type: 'desc', nums: [8500, 6500, 2500, 4500] },
+        
+        // મધ્યમ અઘરા પ્રશ્નો (Medium - 4 અંકો, થોડી મળતી આવતી સંખ્યાઓ)
+        { type: 'asc', nums: [4510, 4580, 4520, 4590] },
+        { type: 'asc', nums: [6215, 6290, 6205, 6250] },
+        { type: 'desc', nums: [3421, 3821, 3121, 3621] },
+        { type: 'desc', nums: [8810, 8890, 8840, 8870] },
+        { type: 'asc', nums: [7281, 7182, 7821, 7218] },
+        { type: 'asc', nums: [1122, 1144, 1100, 1133] },
+        { type: 'desc', nums: [5678, 5768, 5867, 5687] },
+        { type: 'desc', nums: [4321, 4312, 4231, 4123] },
+        
+        // અઘરા પ્રશ્નો (Hard - 5 થી 6 અંકો, ખૂબ જ મળતી આવતી સંખ્યાઓ)
+        { type: 'asc', nums: [89456, 89546, 89465, 89645] },
+        { type: 'asc', nums: [304050, 305040, 340050, 350040] },
+        { type: 'desc', nums: [55443, 54543, 55344, 54453] },
+        { type: 'desc', nums: [98765, 98675, 97865, 98576] },
+        { type: 'asc', nums: [256789, 265789, 257689, 267589] },
+        { type: 'desc', nums: [753159, 751359, 753519, 751539] }
+    ];
+
+    let currentIndex = 0;
+    let score = 0;
+    let selectedAnswers = [];
+
+    function loadQuestion() {
+        const q = allQuestions[currentIndex];
+        document.getElementById('current-q').innerText = currentIndex + 1;
+        document.getElementById('instruction-text').innerText = q.type === 'asc' ? '❖ નીચે આપેલી સંખ્યાઓને ચડતા ક્રમમાં ગોઠવો.' : '❖ નીચે આપેલી સંખ્યાઓને ઊતરતા ક્રમમાં ગોઠવો.';
+
+        const sourceArea = document.getElementById('source-area');
+        sourceArea.innerHTML = '';
+        document.getElementById('answer-area').innerHTML = '';
+        
+        const msgBox = document.getElementById('msg-box');
+        msgBox.innerText = '';
+        msgBox.className = 'message';
+        
+        document.getElementById('check-btn').disabled = false;
+        selectedAnswers = [];
+
+        // સંખ્યાઓને બતાવો
+        q.nums.forEach((num, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'number-btn';
+            btn.innerText = num;
+            btn.id = 'src-btn-' + index;
+            btn.onclick = () => selectNumber(num, btn.id);
+            sourceArea.appendChild(btn);
+        });
+    }
+
+    function selectNumber(num, btnId) {
+        if(selectedAnswers.length >= 4) return; // માત્ર 4 જ સંખ્યા પસંદ કરી શકાય
+
+        document.getElementById(btnId).classList.add('disabled');
+        selectedAnswers.push({ num: num, originId: btnId });
+        renderAnswers();
+    }
+
+    function removeNumber(index) {
+        const item = selectedAnswers[index];
+        document.getElementById(item.originId).classList.remove('disabled');
+        selectedAnswers.splice(index, 1);
+        renderAnswers();
+    }
+
+    function renderAnswers() {
+        const ansArea = document.getElementById('answer-area');
+        ansArea.innerHTML = '';
+        selectedAnswers.forEach((item, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'answer-btn';
+            btn.innerText = item.num;
+            btn.onclick = () => removeNumber(index);
+            ansArea.appendChild(btn);
+        });
+    }
+
+    function checkAnswer() {
+        if(selectedAnswers.length < 4) {
+            const msgBox = document.getElementById('msg-box');
+            msgBox.innerText = 'કૃપા કરીને બધી 4 સંખ્યાઓ પસંદ કરો!';
+            msgBox.className = 'message wrong';
+            return;
+        }
+
+        document.getElementById('check-btn').disabled = true;
+        const q = allQuestions[currentIndex];
+        const userNums = selectedAnswers.map(item => item.num);
+        let sortedNums = [...q.nums].sort((a, b) => a - b);
+
+        if(q.type === 'desc') {
+            sortedNums.reverse(); // ઊતરતો ક્રમ
+        }
+
+        let isCorrect = true;
+        for(let i=0; i<4; i++) {
+            if(userNums[i] !== sortedNums[i]) isCorrect = false;
+        }
+
+        const msgBox = document.getElementById('msg-box');
+        if(isCorrect) {
+            score++;
+            msgBox.innerText = 'સાચો જવાબ! ખુબ સરસ. 🌟';
+            msgBox.className = 'message correct';
+        } else {
+            msgBox.innerText = 'ખોટો જવાબ. સાચો ક્રમ: ' + sortedNums.join(', ');
+            msgBox.className = 'message wrong';
+        }
+
+        setTimeout(() => {
+            currentIndex++;
+            if(currentIndex < allQuestions.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }, 3000);
+    }
+
+    function showResult() {
+        document.getElementById('game-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+        document.getElementById('final-score').innerText = score;
+    }
+
+    // ગેમ શરુ કરો
+    loadQuestion();
+</script>
+</body>
+</html>
+"""
+
+with open("ascending_descending_game_mixed.html", "w", encoding="utf-8") as f:
+    f.write(html_content)
+
+print("Mixed difficulty HTML file created successfully.")
