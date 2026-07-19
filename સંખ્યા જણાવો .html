@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>સંખ્યા જણાવો ગેમ</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Mukta+Vaani:wght@400;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Mukta Vaani', sans-serif;
+        }
+
+        body {
+            background-color: #fce4ec;
+            background-image: radial-gradient(#f8bbd0 10%, transparent 10%), radial-gradient(#f8bbd0 10%, transparent 10%);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            background: #fff;
+            padding: 15px 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            border: 4px dashed #ec407a;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .header h1 {
+            color: #d81b60;
+            font-size: 2.3rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .credits {
+            margin-top: 5px;
+            font-size: 1.1rem;
+            color: #1976d2;
+            font-weight: bold;
+        }
+
+        .game-container {
+            background: white;
+            max-width: 700px;
+            width: 100%;
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            text-align: center;
+            position: relative;
+            border: 5px solid #29b6f6;
+        }
+
+        .progress {
+            font-size: 1.3rem;
+            color: #00796b;
+            margin-bottom: 15px;
+            font-weight: bold;
+            background: #e0f2f1;
+            display: inline-block;
+            padding: 5px 20px;
+            border-radius: 15px;
+        }
+
+        .instruction {
+            font-size: 1.6rem;
+            color: #d32f2f;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .question-display {
+            background: #fff8e1;
+            padding: 25px;
+            border-radius: 15px;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #3e2723;
+            margin-bottom: 25px;
+            border: 3px solid #ffca28;
+            letter-spacing: 2px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .answer-input {
+            width: 120px;
+            font-size: 2rem;
+            padding: 5px;
+            text-align: center;
+            border: 3px solid #2196f3;
+            border-radius: 10px;
+            outline: none;
+            color: #1565c0;
+            font-weight: bold;
+        }
+
+        .answer-input:focus {
+            border-color: #ec407a;
+            box-shadow: 0 0 10px rgba(236, 64, 122, 0.5);
+        }
+
+        .submit-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 0 #2e7d32;
+            font-weight: bold;
+        }
+
+        .submit-btn:hover {
+            background: #43a047;
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #2e7d32;
+        }
+
+        .submit-btn:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+
+        .feedback {
+            margin-top: 25px;
+            font-size: 2.2rem;
+            font-weight: bold;
+            min-height: 50px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .feedback.show {
+            opacity: 1;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); }
+            100% { transform: scale(1); }
+        }
+
+        .result-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .result-screen h2 {
+            font-size: 3rem;
+            color: #4caf50;
+            margin-bottom: 20px;
+        }
+
+        .result-screen p {
+            font-size: 2rem;
+            margin-bottom: 30px;
+        }
+
+        .restart-btn {
+            background: #ff5722;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #bf360c;
+        }
+
+        .restart-btn:hover {
+            background: #e64a19;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.8rem; }
+            .question-display { font-size: 1.8rem; padding: 15px; }
+            .answer-input { font-size: 1.5rem; width: 100px; }
+            .credits { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>સંખ્યા જણાવો</h1>
+        <div class="credits">created by : વિજયકુમાર ચાવડા | શાળા : દાદાના મુવાડા પ્રા શાળા</div>
+    </div>
+
+    <div class="game-container" id="gameBox">
+        <div id="quizScreen">
+            <div class="progress" id="progressText"></div>
+            <div class="instruction" id="instructionText"></div>
+            <div class="question-display" id="questionDisplay">
+                <!-- પ્રશ્ન અહીં જનરેટ થશે -->
+            </div>
+            
+            <div>
+                <button class="submit-btn" id="submitBtn" onclick="checkAnswer()">જવાબ ચકાસો</button>
+            </div>
+            <div class="feedback" id="feedbackText"></div>
+        </div>
+
+        <div class="result-screen" id="resultScreen">
+            <h2>ગેમ પૂરી થઈ!</h2>
+            <p>તમારો સ્કોર: <br><br><span id="finalScore" style="color: #d32f2f; font-size: 3.5rem; font-weight: bold;">0</span> / 25</p>
+            <button class="restart-btn" onclick="restartGame()">ફરીથી રમો</button>
+        </div>
+    </div>
+
+    <script>
+        // ઇમેજમાંથી લીધેલા 25 પ્રશ્નો
+        var questionsData = [
+            // તરત પહેલાની સંખ્યા (Image 3)
+            { type: "before", instruction: "તરત પહેલાની સંખ્યા લખો:", num2: "134", ans: "133" },
+            { type: "before", instruction: "તરત પહેલાની સંખ્યા લખો:", num2: "256", ans: "255" },
+            { type: "before", instruction: "તરત પહેલાની સંખ્યા લખો:", num2: "472", ans: "471" },
+            { type: "before", instruction: "તરત પહેલાની સંખ્યા લખો:", num2: "1024", ans: "1023" },
+            { type: "before", instruction: "તરત પહેલાની સંખ્યા લખો:", num2: "2468", ans: "2467" },
+            { type: "before", instruction: "તરત પહેલાની સંખ્યા લખો:", num2: "124579", ans: "124578" },
+            { type: "before", instruction: "તરત પહેલાની સંખ્યા લખો:", num2: "158904", ans: "158903" },
+            { type: "before", instruction: "તરત પહેલાની સંખ્યા લખો:", num2: "203568", ans: "203567" },
+            
+            // તરત પછીની સંખ્યા (Image 2)
+            { type: "after", instruction: "તરત પછીની સંખ્યા લખો:", num1: "148", ans: "149" },
+            { type: "after", instruction: "તરત પછીની સંખ્યા લખો:", num1: "263", ans: "264" },
+            { type: "after", instruction: "તરત પછીની સંખ્યા લખો:", num1: "489", ans: "490" },
+            { type: "after", instruction: "તરત પછીની સંખ્યા લખો:", num1: "1046", ans: "1047" },
+            { type: "after", instruction: "તરત પછીની સંખ્યા લખો:", num1: "3284", ans: "3285" },
+            { type: "after", instruction: "તરત પછીની સંખ્યા લખો:", num1: "159347", ans: "159348" },
+            { type: "after", instruction: "તરત પછીની સંખ્યા લખો:", num1: "170468", ans: "170469" },
+            { type: "after", instruction: "તરત પછીની સંખ્યા લખો:", num1: "239287", ans: "239288" },
+            
+            // વચ્ચેની સંખ્યા (Image 1)
+            { type: "middle", instruction: "વચ્ચેની સંખ્યા લખો:", num1: "148", num2: "150", ans: "149" },
+            { type: "middle", instruction: "વચ્ચેની સંખ્યા લખો:", num1: "269", num2: "271", ans: "270" },
+            { type: "middle", instruction: "વચ્ચેની સંખ્યા લખો:", num1: "586", num2: "588", ans: "587" },
+            { type: "middle", instruction: "વચ્ચેની સંખ્યા લખો:", num1: "1035", num2: "1037", ans: "1036" },
+            { type: "middle", instruction: "વચ્ચેની સંખ્યા લખો:", num1: "57863", num2: "57865", ans: "57864" },
+            { type: "middle", instruction: "વચ્ચેની સંખ્યા લખો:", num1: "100458", num2: "100460", ans: "100459" },
+            { type: "middle", instruction: "વચ્ચેની સંખ્યા લખો:", num1: "261498", num2: "261500", ans: "261499" },
+            { type: "middle", instruction: "વચ્ચેની સંખ્યા લખો:", num1: "312764", num2: "312766", ans: "312765" },
+            { type: "middle", instruction: "વચ્ચેની સંખ્યા લખો:", num1: "412836", num2: "412838", ans: "412837" }
+        ];
+
+        var currentQuestion = 0;
+        var score = 0;
+        var canAnswer = true;
+
+        var progressText = document.getElementById("progressText");
+        var instructionText = document.getElementById("instructionText");
+        var questionDisplay = document.getElementById("questionDisplay");
+        var feedbackText = document.getElementById("feedbackText");
+        var submitBtn = document.getElementById("submitBtn");
+        var quizScreen = document.getElementById("quizScreen");
+        var resultScreen = document.getElementById("resultScreen");
+        var finalScore = document.getElementById("finalScore");
+
+        function loadQuestion() {
+            canAnswer = true;
+            feedbackText.className = "feedback"; 
+            feedbackText.innerHTML = "";
+            submitBtn.style.display = "inline-block";
+
+            var q = questionsData[currentQuestion];
+            progressText.innerHTML = "પ્રશ્ન " + (currentQuestion + 1) + " / " + questionsData.length;
+            instructionText.innerHTML = q.instruction;
+
+            // પ્રશ્નનું માળખું બનાવો
+            var html = "";
+            if(q.type === "before") {
+                html = `<input type="number" id="userAns" class="answer-input" autocomplete="off"> , <span>${q.num2}</span>`;
+            } else if(q.type === "after") {
+                html = `<span>${q.num1}</span> , <input type="number" id="userAns" class="answer-input" autocomplete="off">`;
+            } else if(q.type === "middle") {
+                html = `<span>${q.num1}</span> , <input type="number" id="userAns" class="answer-input" autocomplete="off"> , <span>${q.num2}</span>`;
+            }
+
+            questionDisplay.innerHTML = html;
+            
+            // ઇનપુટ બોક્સ પર ફોકસ કરો અને Enter કી સેટ કરો
+            var inputBox = document.getElementById("userAns");
+            if(inputBox) {
+                inputBox.focus();
+                inputBox.addEventListener("keypress", function(event) {
+                    if (event.key === "Enter") {
+                        event.preventDefault();
+                        checkAnswer();
+                    }
+                });
+            }
+        }
+
+        function checkAnswer() {
+            if (!canAnswer) return;
+            
+            var inputBox = document.getElementById("userAns");
+            var userAnswer = inputBox.value.trim();
+            
+            if(userAnswer === "") {
+                alert("કૃપા કરીને ખાલી બોક્સમાં જવાબ લખો!");
+                inputBox.focus();
+                return;
+            }
+
+            canAnswer = false; 
+            submitBtn.style.display = "none";
+            inputBox.disabled = true;
+
+            var correctAns = questionsData[currentQuestion].ans;
+
+            if (userAnswer === correctAns) {
+                score++;
+                inputBox.style.background = "#c8e6c9";
+                inputBox.style.borderColor = "#4caf50";
+                feedbackText.innerHTML = "ખૂબ સરસ!";
+                feedbackText.style.color = "#4caf50";
+            } else {
+                inputBox.style.background = "#ffcdd2";
+                inputBox.style.borderColor = "#f44336";
+                feedbackText.innerHTML = "ખોટો જવાબ! સાચો જવાબ: " + correctAns;
+                feedbackText.style.color = "#d32f2f";
+                inputBox.value = correctAns; // સાચો જવાબ બતાવો
+            }
+
+            feedbackText.className = "feedback show";
+
+            setTimeout(function() {
+                currentQuestion++;
+                if (currentQuestion < questionsData.length) {
+                    loadQuestion();
+                } else {
+                    showResult();
+                }
+            }, 2500); // 2.5 સેકન્ડ પછી આગળ વધશે
+        }
+
+        function showResult() {
+            quizScreen.style.display = "none";
+            resultScreen.style.display = "block";
+            finalScore.innerHTML = score;
+        }
+
+        function restartGame() {
+            currentQuestion = 0;
+            score = 0;
+            quizScreen.style.display = "block";
+            resultScreen.style.display = "none";
+            loadQuestion();
+        }
+
+        window.onload = function() {
+            loadQuestion();
+        };
+    </script>
+</body>
+</html>

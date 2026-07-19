@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>વાચન અર્થગ્રહણ (ઉચ્ચ સ્તર) - ધોરણ 6 થી 8</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            background-color: #17a2b8;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .container {
+            flex: 1;
+            max-width: 850px;
+            margin: 30px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .paragraph-box {
+            background-color: #f8f9fa;
+            padding: 22px;
+            border-left: 6px solid #17a2b8;
+            font-size: 19px;
+            line-height: 1.7;
+            margin-bottom: 25px;
+            border-radius: 5px;
+            color: #2c3e50;
+            text-align: justify;
+        }
+        .question-box {
+            font-size: 21px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #d35400;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .option-btn {
+            background-color: #ffffff;
+            border: 2px solid #17a2b8;
+            color: #17a2b8;
+            padding: 15px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            font-weight: 500;
+        }
+        .option-btn:hover {
+            background-color: #e0f2f4;
+        }
+        .option-btn:disabled {
+            cursor: not-allowed;
+        }
+        .option-btn.correct {
+            background-color: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+        .option-btn.wrong {
+            background-color: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .next-btn {
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: none;
+            font-weight: bold;
+        }
+        .next-btn:hover {
+            background-color: #e68900;
+        }
+        .score-board {
+            font-size: 19px;
+            font-weight: bold;
+            color: #17a2b8;
+        }
+        .result-container {
+            text-align: center;
+            display: none;
+        }
+        .result-container h2 {
+            font-size: 32px;
+            color: #28a745;
+        }
+        .restart-btn {
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 18px;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <header>વાચન અર્થગ્રહણ - ઉચ્ચ સ્તર (ધોરણ 6 થી 8)</header>
+
+    <div class="container" id="quiz-container">
+        <div class="score-board">પ્રશ્ન: <span id="current-q">1</span>/20 &nbsp; | &nbsp; ગુણ: <span id="score">0</span></div>
+        <hr>
+        <div class="paragraph-box" id="paragraph-text"></div>
+        <div class="question-box" id="question-text"></div>
+        
+        <div class="options-container" id="options">
+            <!-- Options will be generated here -->
+        </div>
+
+        <div class="controls">
+            <div id="feedback-msg" style="font-weight:bold; font-size:18px;"></div>
+            <button class="next-btn" id="next-btn" onclick="nextQuestion()">આગળનો પ્રશ્ન ➔</button>
+        </div>
+    </div>
+
+    <div class="container result-container" id="result-container">
+        <h2>અભિનંદન!</h2>
+        <p style="font-size: 22px;">તમારો કુલ સ્કોર: <strong id="final-score">0</strong> / 20</p>
+        <button class="restart-btn" onclick="restartQuiz()">ફરીથી રમો</button>
+    </div>
+
+    <footer>
+        Created by: વિજયકુમાર ચાવડા &nbsp; | &nbsp; શાળા: દાદાના મુવાડા પ્રા શાળા
+    </footer>
+
+    <script>
+        const data = [
+            {
+                para: "બ્લેક હોલ અવકાશમાં એવી જગ્યા છે જ્યાં ગુરુત્વાકર્ષણ એટલું મજબૂત હોય છે કે પ્રકાશ પણ તેમાંથી બહાર નીકળી શકતો નથી. જ્યારે કોઈ વિશાળ તારો પોતાના અંતિમ તબક્કામાં પહોંચે છે અને તેનો ગર્ભ તૂટી પડે છે, ત્યારે સંકોચનને કારણે બ્લેક હોલની રચના થાય છે.",
+                question: "બ્લેક હોલમાંથી પ્રકાશ કેમ બહાર નીકળી શકતો નથી?",
+                options: ["કારણ કે તારાનો અંત થઈ ગયો છે", "અત્યંત શક્તિશાળી ગુરુત્વાકર્ષણને લીધે", "અવકાશમાં અંધકાર હોવાથી", "તે પ્રકાશને શોષતો ન હોવાથી"],
+                answer: 1
+            },
+            {
+                para: "'કાર્બન ફૂટપ્રિન્ટ' એટલે કોઈપણ વ્યક્તિ, સંસ્થા કે પ્રવૃત્તિ દ્વારા વાતાવરણમાં છોડવામાં આવતો કુલ ગ્રીનહાઉસ વાયુઓનો જથ્થો. અશ્મિભૂત બળતણનો વધુ પડતો ઉપયોગ અને જંગલોનો વિનાશ આ ફૂટપ્રિન્ટમાં વધારો કરે છે, જે ગ્લોબલ વોર્મિંગ માટે સીધો જવાબદાર છે.",
+                question: "નીચેનામાંથી કઈ પ્રવૃત્તિ કાર્બન ફૂટપ્રિન્ટ ઘટાડવામાં મદદરૂપ થશે?",
+                options: ["સાર્વજનિક વાહનવ્યવહારનો ઉપયોગ કરવો", "પેટ્રોલવાળા વાહનો વધુ ચલાવવા", "જંગલો કાપી ફેક્ટરીઓ બનાવવી", "પ્લાસ્ટિકનો વધુ ઉપયોગ કરવો"],
+                answer: 0
+            },
+            {
+                para: "ડી.એન.એ. (DNA) એ સજીવોના કોષોમાં રહેલો એક સૂક્ષ્મ અણુ છે, જે પેઢી દર પેઢી આનુવંશિક માહિતીનું વહન કરે છે. માતા-પિતાના શારીરિક લક્ષણો તેમના સંતાનોમાં કઈ રીતે અને કયા સ્વરૂપે આવશે, તે ડી.એન.એ. માં રહેલા જનીનો (Genes) દ્વારા નક્કી થાય છે.",
+                question: "ફકરા મુજબ, સજીવોમાં આનુવંશિક લક્ષણો માટે મુખ્યત્વે કોણ જવાબદાર છે?",
+                options: ["રક્તકણો", "પર્યાવરણ", "ડી.એન.એ. (DNA)", "દૈનિક આહાર"],
+                answer: 2
+            },
+            {
+                para: "સિંધુ ખીણની સંસ્કૃતિ તેના આયોજનબદ્ધ નગરો અને ઉત્કૃષ્ટ ગટર યોજના માટે જાણીતી હતી. હડપ્પા અને મોહેંજો-દડો જેવા શહેરોમાં રસ્તાઓ એકબીજાને કાટખૂણે મળતા હતા અને ગંદકીના નિકાલ માટે બંધ ગટરો હતી, જે તે સમયના લોકોની ઇજનેરી કુશળતા દર્શાવે છે.",
+                question: "સિંધુ ખીણની સંસ્કૃતિની ઇજનેરી કુશળતાનું સૌથી મોટું ઉદાહરણ કયું છે?",
+                options: ["વિશાળ મંદિરો અને મૂર્તિઓ", "અદ્યતન નગર આયોજન અને ગટર વ્યવસ્થા", "ધાતુના શસ્ત્રોનું નિર્માણ", "ખેતી કરવાની આધુનિક પદ્ધતિઓ"],
+                answer: 1
+            },
+            {
+                para: "નિષ્ફળતા એ સફળતાની વિરોધી નથી, પરંતુ તે સફળતાની પ્રક્રિયાનો એક અનિવાર્ય ભાગ છે. થોમસ આલ્વા એડિસને વીજળીના બલ્બની શોધ કરતા પહેલાં હજારો વખત નિષ્ફળતાનો સામનો કર્યો હતો, પરંતુ તેમણે દરેક પ્રયત્નને શીખવાની તક માની લીધી હતી.",
+                question: "ફકરાના આધારે નિષ્ફળતા વિશે લેખકનો શું મત છે?",
+                options: ["તે માણસને કાયમ માટે નિરાશ કરે છે", "તે સફળતા માટેનું પગથિયું અને પ્રક્રિયાનો ભાગ છે", "તે માત્ર નસીબ ખરાબ હોવાને કારણે આવે છે", "સફળ માણસો ક્યારેય નિષ્ફળ જતા નથી"],
+                answer: 1
+            },
+            {
+                para: "આપણા શરીરમાં શ્વેતકણો (White blood cells) રોગપ્રતિકારક તંત્રના સૈનિકો સમાન છે. જ્યારે બહારથી કોઈ હાનિકારક વાયરસ કે બેક્ટેરિયા શરીરમાં પ્રવેશે છે, ત્યારે શ્વેતકણો 'એન્ટિબોડીઝ' ઉત્પન્ન કરીને તેમની સામે લડે છે અને શરીરને રોગમુક્ત રાખે છે.",
+                question: "જો કોઈ વ્યક્તિના શરીરમાં શ્વેતકણોની સંખ્યા ઘટી જાય તો શું પરિણામ આવી શકે?",
+                options: ["વ્યક્તિ વારંવાર અને ઝડપથી બીમાર પડી શકે", "શરીરની રોગપ્રતિકારક શક્તિમાં વધારો થાય છે", "શરીરમાં તાકાત અને ઊર્જામાં વધારો થાય છે", "રક્તચાપ અચાનક ઘટી જાય છે"],
+                answer: 0
+            },
+            {
+                para: "આર્ટિફિશિયલ ઇન્ટેલિજન્સ (AI) એટલે મશીનો દ્વારા પ્રદર્શિત થતી બુદ્ધિમત્તા. માણસની જેમ જ ગણતરી કરવા, શીખવા અને નિર્ણય લેવા માટે કમ્પ્યુટર અલ્ગોરિધમ તૈયાર કરવામાં આવે છે. પરંતુ, મશીન પાસે અંતઃસ્ફુરણા (Intuition) કે માનવીય સંવેદના હોતી નથી.",
+                question: "મનુષ્યની વિચારશક્તિ અને AI વચ્ચેનો મૂળભૂત તફાવત શું છે?",
+                options: ["AI માણસ કરતાં ઘણું ધીમું વિચારે છે", "AI માં લાગણી, સંવેદના કે અંતઃસ્ફુરણા હોતી નથી", "મનુષ્ય ક્યારેય જટિલ ગણતરી કરી શકતો નથી", "AI ને કામ કરવા માટે ઓક્સિજન જોઈએ છે"],
+                answer: 1
+            },
+            {
+                para: "ફુગાવો (Inflation) એટલે સમય જતાં ચીજવસ્તુઓ અને સેવાઓના ભાવમાં થતો સતત વધારો. જ્યારે બજારમાં નાણાંનો પુરવઠો વધે છે અને વસ્તુઓનું ઉત્પાદન તે જ પ્રમાણમાં વધતું નથી, ત્યારે ફુગાવો સર્જાય છે, જેનાથી ચલણની ખરીદશક્તિ ઘટી જાય છે.",
+                question: "ફુગાવાના કારણે સામાન્ય માણસના નાણાં પર શું અસર થાય છે?",
+                options: ["તેના નાણાંની ખરીદશક્તિ ઘટે છે", "બજારમાં વસ્તુઓ સસ્તી થાય છે", "તેની આવક આપમેળે બમણી થાય છે", "બચતમાં કોઈ જ ફરક પડતો નથી"],
+                answer: 0
+            },
+            {
+                para: "સમુદ્રી પ્રવાહો (Ocean currents) પૃથ્વીના તાપમાનને જાળવી રાખવામાં મહત્વનો ભાગ ભજવે છે. વિષુવવૃત્તથી ગરમ પ્રવાહો ધ્રુવો તરફ જાય છે અને ધ્રુવો તરફથી ઠંડા પ્રવાહો વિષુવવૃત્ત તરફ આવે છે, જેનાથી સમગ્ર પૃથ્વીની આબોહવા સંતુલિત રહે છે.",
+                question: "સમુદ્રી પ્રવાહોનું પૃથ્વી પર મુખ્ય કાર્ય શું છે?",
+                options: ["માછલીઓને એક જગ્યાએથી બીજી જગ્યાએ લઈ જવી", "પૃથ્વીના તાપમાન અને આબોહવાને સંતુલિત રાખવું", "દરિયાના ખારાશના સ્તરને ઘટાડવું", "દરિયામાં સુનામી અને ચક્રવાત રોકવા"],
+                answer: 1
+            },
+            {
+                para: "સારા પુસ્તકોનો સંગાથ માણસને એકાંતમાં પણ એકલતાનો અનુભવ થવા દેતો નથી. વાચન માત્ર માહિતી નથી આપતું, પરંતુ તે વિચારવાની દ્રષ્ટિ બદલે છે, તર્કશક્તિ વધારે છે અને માનવીય સંવેદનાઓને વધુ સૂક્ષ્મ અને ઊંડી બનાવે છે.",
+                question: "ફકરા મુજબ, પુસ્તકો વાંચવાનો સૌથી મોટો આંતરિક ફાયદો કયો છે?",
+                options: ["તે માત્ર પરીક્ષા પાસ કરવામાં મદદ કરે છે", "તે એકલતા દૂર કરી વિચારદ્રષ્ટિ અને સંવેદના ખીલવે છે", "તેથી સમાજમાં મોભો વધે છે", "તે સમય પસાર કરવાનું સૌથી સસ્તું સાધન છે"],
+                answer: 1
+            },
+            {
+                para: "નિવસનતંત્ર (Ecosystem) માં સજીવો એકબીજા પર અને તેમના ભૌતિક પર્યાવરણ પર આધાર રાખે છે. જો કોઈ એક કડી કે પ્રજાતિ નષ્ટ થાય, તો આખી આહારશૃંખલા (Food chain) ખોરવાઈ જાય છે, જે આખરે પર્યાવરણના અસ્તિત્વ માટે જોખમરૂપ છે.",
+                question: "પર્યાવરણમાં આહારશૃંખલા ખોરવાઈ જવા પાછળનું સૌથી સંભવિત કારણ શું હોઈ શકે?",
+                options: ["વાતાવરણમાં વરસાદનું પ્રમાણ અચાનક વધવું", "કોઈ એક ચોક્કસ સજીવ પ્રજાતિનું નષ્ટ થવું", "નવા જંગલોનું નિર્માણ થવું", "સૂર્યપ્રકાશમાં સામાન્ય વધારો થવો"],
+                answer: 1
+            },
+            {
+                para: "યુરોપમાં નવજાગૃતિ (Renaissance) કાળ દરમિયાન કળા, વિજ્ઞાન અને સાહિત્યમાં ક્રાંતિકારી ફેરફારો આવ્યા. લોકોએ રૂઢિચુસ્ત અને અંધશ્રદ્ધાળુ વિચારો છોડીને વૈજ્ઞાનિક અને તાર્કિક દ્રષ્ટિકોણ અપનાવ્યો, જેણે આધુનિક યુગનો પાયો નાખ્યો.",
+                question: "નવજાગૃતિ કાળે યુરોપના લોકોની વિચારસરણીમાં કેવો બદલાવ આણ્યો?",
+                options: ["તેઓ વધુ ધાર્મિક અને અંધશ્રદ્ધાળુ બન્યા", "તેમણે તાર્કિક અને વૈજ્ઞાનિક દ્રષ્ટિકોણ અપનાવ્યો", "તેમણે કળા અને સાહિત્યનો સંપૂર્ણ ત્યાગ કર્યો", "તેઓ આધુનિકતા છોડી જૂની પરંપરા તરફ વળ્યા"],
+                answer: 1
+            },
+            {
+                para: "લોકશાહી એટલે લોકોનું, લોકો માટે અને લોકો દ્વારા ચાલતું શાસન. પરંતુ એક સફળ અને જીવંત લોકશાહી માત્ર નિયમિત ચૂંટણી પૂરતી મર્યાદિત નથી; તેમાં નાગરિકોની રાજકીય જાગૃતિ, વાણી સ્વાતંત્ર્ય અને કાયદાનું સમાન શાસન અનિવાર્ય છે.",
+                question: "ફકરા પ્રમાણે લોકશાહીને સફળ બનાવવા માટે ચૂંટણી સિવાય બીજું શું અનિવાર્ય છે?",
+                options: ["કોઈ એક શક્તિશાળી નેતાનો આદેશ", "જાગૃત નાગરિકો અને કાયદાનું સમાન શાસન", "પૈસાદાર લોકોનું વર્ચસ્વ", "વારંવાર સરકાર બદલવી"],
+                answer: 1
+            },
+            {
+                para: "'પ્રકાશવર્ષ' (Light Year) એ સમયનો નહીં, પરંતુ અંતરનો એકમ છે. પ્રકાશ શૂન્યાવકાશમાં એક સેકન્ડમાં આશરે ૩ લાખ કિલોમીટરની ઝડપે ગતિ કરે છે. આ પ્રચંડ ઝડપે પ્રકાશ એક વર્ષમાં જેટલું અંતર કાપે તેને એક પ્રકાશવર્ષ કહેવાય છે.",
+                question: "ખગોળવિજ્ઞાનમાં 'પ્રકાશવર્ષ' નો ઉપયોગ શાના માટે થાય છે?",
+                options: ["તારાઓની ઉંમર અને સમય માપવા માટે", "પ્રકાશની તીવ્રતા માપવા માટે", "અવકાશમાં ગ્રહો અને તારાઓ વચ્ચેનું વિશાળ અંતર માપવા", "પૃથ્વી પર એક વર્ષના દિવસો ગણવા"],
+                answer: 2
+            },
+            {
+                para: "ઇમોશનલ ઇન્ટેલિજન્સ (EQ) એટલે પોતાની અને અન્યોની લાગણીઓને ઓળખવાની, સમજવાની અને તેને યોગ્ય રીતે નિયંત્રિત કરવાની ક્ષમતા. આજના જટિલ યુગમાં માત્ર બુદ્ધિઆંક (IQ) કરતાં ભાવનાત્મક સ્થિરતા (EQ) ને સફળ નેતૃત્વ માટે વધુ મહત્વની માનવામાં આવે છે.",
+                question: "કોઈ વ્યક્તિ સારો નેતા બની શકે તે માટે IQ કરતાં કોને વધુ અગત્યનું ગણવામાં આવ્યું છે?",
+                options: ["તેનું શારીરિક બળ", "તેની ભાવનાત્મક બુદ્ધિ અને સ્થિરતા (EQ)", "તેની પાસે રહેલી સંપત્તિ", "તેની યાંત્રિક ગણતરી કરવાની ઝડપ"],
+                answer: 1
+            },
+            {
+                para: "ઓઝોન સ્તર પૃથ્વીના સ્ટ્રેટોસ્ફિયરમાં આવેલું એક સુરક્ષા કવચ છે. તે સૂર્યમાંથી આવતા અત્યંત હાનિકારક પારજાંબલી (Ultraviolet) કિરણોને શોષી લે છે. જો પ્રદૂષણને કારણે આ સ્તરમાં ગાબડા પડે, તો પૃથ્વી પર ચામડીના કેન્સરનું જોખમ વધી જાય છે.",
+                question: "જો વાતાવરણમાં ઓઝોન સ્તર ન હોય, તો પૃથ્વી પર શું જોખમ ઊભું થાય?",
+                options: ["પૃથ્વી પર બરફ જામી જાય", "હાનિકારક પારજાંબલી કિરણોથી રોગોનું જોખમ વધે", "રાત્રે ચાંદની દેખાતી બંધ થઈ જાય", "ઓક્સિજનનું પ્રમાણ અચાનક વધી જાય"],
+                answer: 1
+            },
+            {
+                para: "અર્થશાસ્ત્રમાં 'વૈકલ્પિક ખર્ચ' (Opportunity Cost) નો સિદ્ધાંત ખૂબ મહત્વનો છે. જ્યારે તમારી પાસે મર્યાદિત સાધનો હોય અને તમે કોઈ એક વિકલ્પ પસંદ કરો છો, ત્યારે તમે જે બીજા શ્રેષ્ઠ વિકલ્પનો ત્યાગ કરો છો, તે જતો કરેલ લાભ એ પસંદ કરેલ વિકલ્પનો વૈકલ્પિક ખર્ચ છે.",
+                question: "જો તમે પરીક્ષાની તૈયારી કરવા માટે મિત્રો સાથે ફરવા જવાનું ટાળો છો, તો અહીં 'વૈકલ્પિક ખર્ચ' શું ગણાશે?",
+                options: ["પરીક્ષામાં મળનારા સારા માર્ક્સ", "મિત્રો સાથે ફરવા જવાનો જતો કરેલ આનંદ", "પુસ્તકો ખરીદવાનો ખર્ચ", "પરીક્ષાની ફી"],
+                answer: 1
+            },
+            {
+                para: "વનસ્પતિઓમાં થતી પ્રકાશસંશ્લેષણની પ્રક્રિયા એ માત્ર તેમના માટે ખોરાક બનાવવાની ક્રિયા નથી, પરંતુ તે સમગ્ર જીવસૃષ્ટિ માટે ઓક્સિજનનો મુખ્ય સ્ત્રોત પણ છે. વનસ્પતિ ઝેરી કાર્બન ડાયોક્સાઇડ ગ્રહણ કરીને વાતાવરણને શુદ્ધ કરવાનું અદભુત કાર્ય કરે છે.",
+                question: "પ્રકાશસંશ્લેષણની પ્રક્રિયા મનુષ્ય અને અન્ય પ્રાણીઓ માટે કેમ અત્યંત ઉપયોગી છે?",
+                options: ["કારણ કે તેમાંથી ઇમારતી લાકડું મળે છે", "તે પ્રાણવાયુ (ઓક્સિજન) પૂરો પાડે છે અને વાતાવરણ શુદ્ધ કરે છે", "તે જમીનનું ધોવાણ અટકાવે છે", "તે સૂર્યના તાપને ઘટાડે છે"],
+                answer: 1
+            },
+            {
+                para: "ઔદ્યોગિક ક્રાંતિની શરૂઆત ૧૮મી સદીમાં ઇંગ્લેન્ડથી થઈ. હાથસાળના બદલે મશીનોથી કાપડ બનવા લાગ્યું અને વરાળ યંત્રની શોધે વાહનવ્યવહારને વેગ આપ્યો. જોકે, આ ઝડપી ઉત્પાદનના પરિણામે પરંપરાગત કુટીર ઉદ્યોગો પડી ભાંગ્યા અને મજૂરોમાં બેરોજગારી ઉદ્ભવી.",
+                question: "ઔદ્યોગિક ક્રાંતિની સમાજ પર પડેલી એક મોટી નકારાત્મક અસર કઈ હતી?",
+                options: ["ઉત્પાદનમાં અને ઝડપમાં વધારો થયો", "વરાળ યંત્ર અને રેલવેની શોધ થઈ", "પરંપરાગત કુટીર ઉદ્યોગોનો નાશ અને બેરોજગારી", "લોકો ખેતી તરફ વધુ વળ્યા"],
+                answer: 2
+            },
+            {
+                para: "માઇન્ડફુલનેસ (Mindfulness) એટલે ભવિષ્યની વ્યર્થ ચિંતા કે ભૂતકાળના પસ્તાવા છોડીને વર્તમાન ક્ષણમાં સંપૂર્ણ જાગૃતિ સાથે જીવવાની કળા. આ માનસિક અવસ્થા અપનાવવાથી મગજનો તણાવ ઘટે છે અને વ્યક્તિની એકાગ્રતા તથા સાચા નિર્ણયો લેવાની ક્ષમતામાં નોંધપાત્ર સુધારો થાય છે.",
+                question: "માઇન્ડફુલનેસનો અભ્યાસ વ્યક્તિને કઈ રીતે મદદરૂપ થાય છે?",
+                options: ["ભવિષ્યનું સચોટ અનુમાન લગાવવામાં", "ભૂતકાળની ભૂલોને વારંવાર યાદ કરવામાં", "વર્તમાનમાં જાગૃત રહી તણાવ ઘટાડવા અને એકાગ્રતા વધારવામાં", "સંપૂર્ણપણે કામ છોડીને આરામ કરવામાં"],
+                answer: 2
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const paraText = document.getElementById("paragraph-text");
+        const questionText = document.getElementById("question-text");
+        const optionsContainer = document.getElementById("options");
+        const nextBtn = document.getElementById("next-btn");
+        const feedbackMsg = document.getElementById("feedback-msg");
+        const currentQDisplay = document.getElementById("current-q");
+        const scoreDisplay = document.getElementById("score");
+        const quizContainer = document.getElementById("quiz-container");
+        const resultContainer = document.getElementById("result-container");
+        const finalScoreDisplay = document.getElementById("final-score");
+
+        function loadQuestion() {
+            nextBtn.style.display = "none";
+            feedbackMsg.innerHTML = "";
+            optionsContainer.innerHTML = "";
+            
+            let qData = data[currentQuestionIndex];
+            currentQDisplay.innerText = currentQuestionIndex + 1;
+            
+            paraText.innerText = qData.para;
+            questionText.innerText = "પ્રશ્ન: " + qData.question;
+
+            qData.options.forEach((opt, index) => {
+                let btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIndex, btn) {
+            let qData = data[currentQuestionIndex];
+            let buttons = document.querySelectorAll(".option-btn");
+            
+            buttons.forEach(b => b.disabled = true);
+
+            if (selectedIndex === qData.answer) {
+                btn.classList.add("correct");
+                feedbackMsg.innerText = "✓ સાચો જવાબ! ખૂબ સરસ.";
+                feedbackMsg.style.color = "#28a745";
+                score++;
+                scoreDisplay.innerText = score;
+            } else {
+                btn.classList.add("wrong");
+                buttons[qData.answer].classList.add("correct"); 
+                feedbackMsg.innerText = "✗ ખોટો જવાબ. ફરી પ્રયત્ન કરજો.";
+                feedbackMsg.style.color = "#dc3545";
+            }
+
+            nextBtn.style.display = "block";
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < data.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            quizContainer.style.display = "none";
+            resultContainer.style.display = "block";
+            finalScoreDisplay.innerText = score;
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            scoreDisplay.innerText = score;
+            quizContainer.style.display = "block";
+            resultContainer.style.display = "none";
+            loadQuestion();
+        }
+
+        window.onload = loadQuestion;
+
+    </script>
+</body>
+</html>

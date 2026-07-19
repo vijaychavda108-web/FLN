@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>વાચન અર્થગ્રહણ - ધોરણ 6 થી 8</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            background-color: #0056b3;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .container {
+            flex: 1;
+            max-width: 800px;
+            margin: 30px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .paragraph-box {
+            background-color: #eef2f5;
+            padding: 20px;
+            border-left: 5px solid #0056b3;
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            border-radius: 5px;
+            color: #333;
+        }
+        .question-box {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #d9534f;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .option-btn {
+            background-color: #ffffff;
+            border: 2px solid #0056b3;
+            color: #0056b3;
+            padding: 15px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+        .option-btn:hover {
+            background-color: #e6f0ff;
+        }
+        .option-btn:disabled {
+            cursor: not-allowed;
+        }
+        .option-btn.correct {
+            background-color: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+        .option-btn.wrong {
+            background-color: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .next-btn {
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: none;
+            font-weight: bold;
+        }
+        .next-btn:hover {
+            background-color: #e68900;
+        }
+        .score-board {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0056b3;
+        }
+        .result-container {
+            text-align: center;
+            display: none;
+        }
+        .result-container h2 {
+            font-size: 32px;
+            color: #28a745;
+        }
+        .restart-btn {
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        footer {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 18px;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <header>વાચન અર્થગ્રહણ (ધોરણ 6 થી 8)</header>
+
+    <div class="container" id="quiz-container">
+        <div class="score-board">પ્રશ્ન: <span id="current-q">1</span>/20 &nbsp; | &nbsp; ગુણ: <span id="score">0</span></div>
+        <hr>
+        <div class="paragraph-box" id="paragraph-text"></div>
+        <div class="question-box" id="question-text"></div>
+        
+        <div class="options-container" id="options">
+            <!-- Options will be generated here -->
+        </div>
+
+        <div class="controls">
+            <div id="feedback-msg" style="font-weight:bold; font-size:18px;"></div>
+            <button class="next-btn" id="next-btn" onclick="nextQuestion()">આગળનો પ્રશ્ન ➔</button>
+        </div>
+    </div>
+
+    <div class="container result-container" id="result-container">
+        <h2>અભિનંદન!</h2>
+        <p style="font-size: 22px;">તમારો કુલ સ્કોર: <strong id="final-score">0</strong> / 20</p>
+        <button class="restart-btn" onclick="restartQuiz()">ફરીથી રમો</button>
+    </div>
+
+    <footer>
+        Created by: વિજયકુમાર ચાવડા &nbsp; | &nbsp; શાળા: દાદાના મુવાડા પ્રા શાળા
+    </footer>
+
+    <script>
+        const data = [
+            {
+                para: "સૂર્ય એક તારો છે. તે આપણને પ્રકાશ અને ગરમી આપે છે. પૃથ્વી સૂર્યની આસપાસ ફરે છે. સૂર્યમંડળમાં કુલ આઠ ગ્રહો છે, જેમાં પૃથ્વી એકમાત્ર એવો ગ્રહ છે જ્યાં જીવસૃષ્ટિ શક્ય છે.",
+                question: "પૃથ્વી કોની આસપાસ ફરે છે?",
+                options: ["ચંદ્ર", "સૂર્ય", "મંગળ", "તારા"],
+                answer: 1
+            },
+            {
+                para: "ગાંધીજીનો જન્મ ૨ ઓક્ટોબર ૧૮૬૯ના રોજ પોરબંદરમાં થયો હતો. તેમનું પૂરું નામ મોહનદાસ કરમચંદ ગાંધી હતું. તેમણે ભારતને અંગ્રેજોની ગુલામીમાંથી મુક્ત કરાવવા સત્યાગ્રહની લડત ચલાવી હતી.",
+                question: "ગાંધીજીનો જન્મ ક્યાં થયો હતો?",
+                options: ["અમદાવાદ", "રાજકોટ", "પોરબંદર", "સુરત"],
+                answer: 2
+            },
+            {
+                para: "પાણી એ જીવન છે. પૃથ્વી પરનો ૭૧% ભાગ પાણીથી ઘેરાયેલો છે, પરંતુ પીવાલાયક મીઠું પાણી ખૂબ જ ઓછું છે. તેથી આપણે પાણીનો બગાડ અટકાવવો જોઈએ.",
+                question: "પૃથ્વી પર કેટલા ટકા ભાગ પાણીથી ઘેરાયેલો છે?",
+                options: ["૫૦%", "૨૯%", "૧૦૦%", "૭૧%"],
+                answer: 3
+            },
+            {
+                para: "સરદાર વલ્લભભાઈ પટેલ 'લોખંડી પુરુષ' તરીકે ઓળખાય છે. તેમણે ભારતના ૫૬૨ જેટલા દેશી રજવાડાઓને એક કરીને અખંડ ભારતનું નિર્માણ કર્યું હતું.",
+                question: "સરદાર પટેલ કયા નામથી ઓળખાય છે?",
+                options: ["લોખંડી પુરુષ", "રાષ્ટ્રપિતા", "ચાચા", "નેતાજી"],
+                answer: 0
+            },
+            {
+                para: "વનસ્પતિ પોતાનો ખોરાક જાતે બનાવે છે. આ ક્રિયાને પ્રકાશસંશ્લેષણ કહેવાય છે. આ પ્રક્રિયામાં વનસ્પતિ સૂર્યપ્રકાશ, પાણી અને કાર્બન ડાયોક્સાઇડનો ઉપયોગ કરે છે.",
+                question: "વનસ્પતિ ખોરાક બનાવવાની ક્રિયાને શું કહે છે?",
+                options: ["શ્વસન", "પ્રકાશસંશ્લેષણ", "ઉત્સર્જન", "પાચન"],
+                answer: 1
+            },
+            {
+                para: "ગુજરાતનું ગીરનું જંગલ એશિયાટિક સિંહો માટે વિશ્વભરમાં પ્રખ્યાત છે. સમગ્ર એશિયા ખંડમાં સિંહ માત્ર ગુજરાતના ગીરના જંગલમાં જ જોવા મળે છે.",
+                question: "ગીરનું જંગલ કયા પ્રાણી માટે પ્રખ્યાત છે?",
+                options: ["વાઘ", "હાથી", "સિંહ", "ચિત્તો"],
+                answer: 2
+            },
+            {
+                para: "આજના યુગમાં કમ્પ્યુટરનો ઉપયોગ ખૂબ જ વધી ગયો છે. શિક્ષણ, બેન્કિંગ, રેલવે કે આરોગ્ય ક્ષેત્રે કમ્પ્યુટર વિના કામ કરવું મુશ્કેલ બની ગયું છે. તે આપણું કામ ઝડપી અને ભૂલરહિત કરે છે.",
+                question: "કમ્પ્યુટર આપણું કામ કેવું બનાવે છે?",
+                options: ["ધીમું", "અઘરું", "ઝડપી અને ભૂલરહિત", "કંટાળાજનક"],
+                answer: 2
+            },
+            {
+                para: "રમતગમત આપણા શારીરિક અને માનસિક વિકાસ માટે ખૂબ જરૂરી છે. રમતો રમવાથી શરીરમાં સ્ફૂર્તિ આવે છે અને રોગપ્રતિકારક શક્તિ વધે છે. સાથે જ ખેલદિલીની ભાવના વિકસે છે.",
+                question: "રમતગમતથી શાનો વિકાસ થાય છે?",
+                options: ["માત્ર શારીરિક", "માત્ર માનસિક", "શારીરિક અને માનસિક", "કોઈ ફાયદો નથી"],
+                answer: 2
+            },
+            {
+                para: "પુસ્તકો આપણા સાચા મિત્રો છે. સારા પુસ્તકોના વાંચનથી આપણા જ્ઞાનમાં વધારો થાય છે અને નવી દિશા મળે છે. સ્વામી વિવેકાનંદ પુસ્તકોના મોટા પ્રેમી હતા.",
+                question: "આપણા સાચા મિત્રો કોને કહેવામાં આવ્યા છે?",
+                options: ["ટીવી", "પુસ્તકો", "મોબાઈલ", "પૈસા"],
+                answer: 1
+            },
+            {
+                para: "'સ્વચ્છતા ત્યાં પ્રભુતા' એ આપણું સૂત્ર હોવું જોઈએ. જ્યાં ગંદકી હોય છે ત્યાં રોગચાળો ફેલાય છે. આપણે આપણું ઘર, શેરી અને શાળા હંમેશા સ્વચ્છ રાખવા જોઈએ.",
+                question: "જ્યાં ગંદકી હોય ત્યાં શું ફેલાય છે?",
+                options: ["શાંતિ", "રોગચાળો", "સુગંધ", "પ્રભુતા"],
+                answer: 1
+            },
+            {
+                para: "નર્મદા ગુજરાતની સૌથી મોટી નદી છે. તેને ગુજરાતની જીવાદોરી પણ કહેવામાં આવે છે. તેના પર સરદાર સરોવર બંધ બાંધવામાં આવ્યો છે.",
+                question: "ગુજરાતની જીવાદોરી કઈ નદીને કહેવાય છે?",
+                options: ["તાપી", "સાબરમતી", "મહી", "નર્મદા"],
+                answer: 3
+            },
+            {
+                para: "એક જંગલમાં એક કાગડો રહેતો હતો. એક દિવસ તેને રોટલી મળી. તે ઝાડ પર બેઠો હતો ત્યાં એક શિયાળ આવ્યું. શિયાળે કાગડાનાં વખાણ કરી તેને ગીત ગાવા કહ્યું, અને રોટલી નીચે પડી ગઈ.",
+                question: "શિયાળે કાગડા પાસે શું માંગ્યું?",
+                options: ["પાણી", "ગીત ગાવા કહ્યું", "રોટલી", "ફળ"],
+                answer: 1
+            },
+            {
+                para: "વિજ્ઞાને આપણા જીવનને ખૂબ સરળ બનાવ્યું છે. વીજળી, વાહનવ્યવહાર અને સંદેશાવ્યવહારનાં સાધનો એ વિજ્ઞાનની અદ્ભુત શોધો છે.",
+                question: "આપણું જીવન કોણે સરળ બનાવ્યું છે?",
+                options: ["જાદુએ", "અંધશ્રદ્ધાએ", "વિજ્ઞાને", "કંઈ નહીં"],
+                answer: 2
+            },
+            {
+                para: "માતૃભાષા એ આપણા વિચારોને વ્યક્ત કરવાનું શ્રેષ્ઠ માધ્યમ છે. બાળક સૌથી પહેલું શિક્ષણ પોતાની માતૃભાષામાં જ મેળવે છે. ગુજરાતી આપણી માતૃભાષા છે.",
+                question: "બાળક સૌથી પહેલું શિક્ષણ કઈ ભાષામાં મેળવે છે?",
+                options: ["અંગ્રેજી", "હિન્દી", "માતૃભાષા", "સંસ્કૃત"],
+                answer: 2
+            },
+            {
+                para: "મોર ભારતનું રાષ્ટ્રીય પક્ષી છે. તેના પીંછા રંગબેરંગી અને સુંદર હોય છે. વરસાદ આવવાનો હોય ત્યારે મોર ખુશ થઈને કળા કરે છે.",
+                question: "ભારતનું રાષ્ટ્રીય પક્ષી કયું છે?",
+                options: ["પોપટ", "કબૂતર", "મોર", "કોયલ"],
+                answer: 2
+            },
+            {
+                para: "સમય ખૂબ જ કિંમતી છે. વીતી ગયેલો સમય ક્યારેય પાછો આવતો નથી. તેથી વિદ્યાર્થીઓએ સમયનો સદુપયોગ કરી અભ્યાસમાં ધ્યાન આપવું જોઈએ.",
+                question: "શું પાછું આવતું નથી?",
+                options: ["પૈસા", "વીતી ગયેલો સમય", "પુસ્તક", "મિત્ર"],
+                answer: 1
+            },
+            {
+                para: "ભારતમાં મુખ્યત્વે ત્રણ ઋતુઓ છે: શિયાળો, ઉનાળો અને ચોમાસું. શિયાળામાં ઠંડી પડે છે, ઉનાળામાં ગરમી પડે છે અને ચોમાસામાં વરસાદ આવે છે. વરસાદ ખેતી માટે ખૂબ જરૂરી છે.",
+                question: "ખેતી માટે શું ખૂબ જરૂરી છે?",
+                options: ["ઠંડી", "ગરમી", "વરસાદ", "બરફ"],
+                answer: 2
+            },
+            {
+                para: "દિવાળી એ પ્રકાશનો તહેવાર છે. આ દિવસે લોકો પોતાના ઘરને દીવાઓથી શણગારે છે, નવાં કપડાં પહેરે છે અને ફટાકડા ફોડે છે. તે આસો માસની અમાસના દિવસે આવે છે.",
+                question: "દિવાળી કયા માસમાં આવે છે?",
+                options: ["શ્રાવણ", "આસો", "કાર્તિક", "ચૈત્ર"],
+                answer: 1
+            },
+            {
+                para: "પ્રામાણિકતા એ શ્રેષ્ઠ નીતિ છે. સાચું બોલનાર વ્યક્તિ ક્યારેય ડરતો નથી. ભલે ગમે તેવી મુશ્કેલી આવે, આપણે હંમેશા સત્યનો સાથ આપવો જોઈએ.",
+                question: "શ્રેષ્ઠ નીતિ કઈ છે?",
+                options: ["ખોટું બોલવું", "ચોરી કરવી", "પ્રામાણિકતા", "ડરવું"],
+                answer: 2
+            },
+            {
+                para: "સાચો મિત્ર એ છે જે મુશ્કેલીના સમયે આપણી મદદ કરે. કૃષ્ણ અને સુદામાની મિત્રતા વિશ્વમાં પ્રખ્યાત છે. મિત્રતામાં સ્વાર્થ ન હોવો જોઈએ.",
+                question: "સાચો મિત્ર ક્યારે મદદ કરે છે?",
+                options: ["માત્ર ખુશીમાં", "મુશ્કેલીના સમયે", "જ્યારે પૈસા હોય ત્યારે", "પરીક્ષામાં"],
+                answer: 1
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const paraText = document.getElementById("paragraph-text");
+        const questionText = document.getElementById("question-text");
+        const optionsContainer = document.getElementById("options");
+        const nextBtn = document.getElementById("next-btn");
+        const feedbackMsg = document.getElementById("feedback-msg");
+        const currentQDisplay = document.getElementById("current-q");
+        const scoreDisplay = document.getElementById("score");
+        const quizContainer = document.getElementById("quiz-container");
+        const resultContainer = document.getElementById("result-container");
+        const finalScoreDisplay = document.getElementById("final-score");
+
+        function loadQuestion() {
+            // Reset UI for new question
+            nextBtn.style.display = "none";
+            feedbackMsg.innerHTML = "";
+            optionsContainer.innerHTML = "";
+            
+            let qData = data[currentQuestionIndex];
+            currentQDisplay.innerText = currentQuestionIndex + 1;
+            
+            paraText.innerText = qData.para;
+            questionText.innerText = "પ્રશ્ન: " + qData.question;
+
+            qData.options.forEach((opt, index) => {
+                let btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIndex, btn) {
+            let qData = data[currentQuestionIndex];
+            let buttons = document.querySelectorAll(".option-btn");
+            
+            // Disable all buttons
+            buttons.forEach(b => b.disabled = true);
+
+            if (selectedIndex === qData.answer) {
+                btn.classList.add("correct");
+                feedbackMsg.innerText = "✓ સાચો જવાબ!";
+                feedbackMsg.style.color = "#28a745";
+                score++;
+                scoreDisplay.innerText = score;
+            } else {
+                btn.classList.add("wrong");
+                buttons[qData.answer].classList.add("correct"); // Highlight correct answer
+                feedbackMsg.innerText = "✗ ખોટો જવાબ!";
+                feedbackMsg.style.color = "#dc3545";
+            }
+
+            nextBtn.style.display = "block";
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < data.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            quizContainer.style.display = "none";
+            resultContainer.style.display = "block";
+            finalScoreDisplay.innerText = score;
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            scoreDisplay.innerText = score;
+            quizContainer.style.display = "block";
+            resultContainer.style.display = "none";
+            loadQuestion();
+        }
+
+        // Load first question on start
+        window.onload = loadQuestion;
+
+    </script>
+</body>
+</html>
