@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ભાગાકાર વર્કશીટ</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for the worksheet appearance and print optimization */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            transition: background-color 0.3s;
+        }
+
+        /* Styling for the problem box */
+        .problem-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center the whole problem box in the grid cell */
+            justify-content: center;
+            padding: 1rem;
+            margin: 0.5rem;
+            user-select: none;
+            cursor: default;
+            border-radius: 0.5rem;
+            transition: transform 0.1s, box-shadow 0.1s;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Container to enforce right alignment for the numbers */
+        .problem-alignment-container {
+            width: 160px; /* Increased to accommodate larger dividend numbers */
+            line-height: 1;
+        }
+        
+        .number-row {
+            font-size: 2.5rem;
+            line-height: 1;
+            padding-right: 4px; /* Small padding for visual balance */
+        }
+        
+        .operator-row {
+            display: flex;
+            justify-content: flex-end; /* Align the row content to the right */
+            align-items: center;
+        }
+
+        .divide-sign {
+            font-size: 2.5rem;
+            line-height: 1;
+            margin-right: 0.5rem; /* Space between sign and number */
+        }
+
+        .line {
+            width: 90%; 
+            height: 3px;
+            background-color: #333;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+            align-self: center; 
+        }
+
+        .answer-input {
+            width: 120px; 
+            text-align: right; 
+            font-size: 1.5rem;
+            border: 3px solid #ccc; 
+            border-radius: 0.375rem;
+            padding: 0.25rem 4px;
+            background-color: #fff;
+            transition: border-color 0.2s; 
+        }
+
+        /* Hide the native up/down increment/decrement buttons (spinners) from number inputs */
+        .answer-input::-webkit-outer-spin-button,
+        .answer-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .answer-input[type=number] {
+            -moz-appearance: textfield; /* Firefox */
+        }
+
+        /* --- Print Styles (A4 Optimization) --- */
+        @media print {
+            @page {
+                size: A4; 
+                margin: 1cm; 
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                background-color: #fff;
+            }
+
+            .print-hidden {
+                display: none !important;
+            }
+
+            #worksheet-header {
+                display: flex;
+                justify-content: space-between; 
+                align-items: flex-end;
+                margin-bottom: 20pt;
+                font-size: 14pt;
+                padding: 0 10pt;
+            }
+            #worksheet-header .creator-info {
+                font-size: 10pt; 
+                color: #555;
+            } 
+
+            #worksheet-grid {
+                width: 100%;
+                grid-template-columns: repeat(4, 1fr); 
+                gap: 40px 10px; 
+                padding: 20px 10px;
+                display: grid; 
+            }
+
+            .problem-box {
+                box-shadow: none;
+                border: none;
+                margin: 0;
+                padding: 0;
+                font-size: 14pt;
+                height: 180px; 
+            }
+
+            .problem-alignment-container {
+                width: 100%; 
+                max-width: 180pt; 
+                margin-left: auto; 
+                margin-right: auto;
+            }
+            
+            .number-row {
+                font-size: 30pt; 
+                line-height: 1.2;
+            }
+
+            .divide-sign {
+                font-size: 30pt; 
+            }
+
+            .line {
+                width: 90%;
+                height: 2pt;
+                background-color: #000;
+                margin-bottom: 50pt; 
+            }
+            
+            .answer-input {
+                display: block; 
+                width: 120pt; 
+                border: 1pt solid #000; 
+                border-radius: 0.375rem; 
+                padding: 0.25rem 4px;
+                margin-top: 5pt;
+                background-color: #fff; 
+                pointer-events: none; 
+                color: #000; 
+                font-size: 24pt; 
+            }
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <!-- Main Application Container -->
+    <div class="max-w-5xl mx-auto bg-white p-6 rounded-xl shadow-2xl">
+        <h1 class="text-3xl sm:text-4xl font-bold text-center mb-4 text-blue-700">ભાગાકાર વર્કશીટ</h1>
+        <p class="text-center text-gray-600 mb-6 print-hidden">રેન્ડમલી દાખલાઓ જનરેટ કરવા માટે 'નવી વર્કશીટ' બટન દબાવો. અંકો પસંદ કરી શકો છો. જવાબ દાખલ કરતા જ ચકાસણી થશે.</p>
+
+        <!-- Header for Print (Creator Info) -->
+        <div id="worksheet-header" class="text-right text-lg mb-6">
+            <h2 class="font-bold text-xl text-blue-700 print-hidden">ભાગાકાર વર્કશીટ</h2>
+            <!-- Updated Creator Info -->
+            <div class="creator-info text-sm text-gray-500 font-semibold">બનાવનાર: વિજયકુમાર ચાવડા | શાળા: દાદાના મુવાડા પ્રા. શાળા</div>
+        </div> 
+
+        <!-- Control Buttons (Hidden in Print) -->
+        <div id="controls" class="flex flex-wrap justify-center items-center gap-3 mb-6 print-hidden">
+            <!-- Dropdown for selecting digits -->
+            <select id="digit-select" class="bg-white border-2 border-blue-500 text-blue-700 font-semibold py-3 px-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                <option value="1">1 અંક (સરળ)</option>
+                <option value="2" selected>2 અંક (મધ્યમ)</option>
+                <option value="3">3 અંક (અઘરા)</option>
+            </select>
+            
+            <button id="new-worksheet-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200">
+                નવી વર્કશીટ જનરેટ કરો
+            </button>
+        </div>
+        
+        <div id="user-info" class="text-xs text-gray-500 text-center mb-4 print-hidden hidden"></div>
+
+        <!-- Worksheet Grid -->
+        <div id="worksheet-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-4 p-4 border-2 border-dashed border-gray-300 rounded-lg">
+            <!-- Problems will be inserted here by JavaScript -->
+            <div class="problem-box col-span-3 sm:col-span-4 text-center text-xl text-gray-500">
+                શરૂ કરવા માટે 'નવી વર્કશીટ જનરેટ કરો' બટન દબાવો.
+            </div>
+        </div>
+
+        <!-- Message/Modal Area -->
+        <div id="message-area" class="mt-6 p-4 text-center text-lg font-semibold rounded-lg hidden"></div>
+    </div>
+
+    <!-- Firebase Imports and Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let auth;
+        let userId = 'default-user'; 
+        let isAuthReady = true; 
+        let currentProblems = [];
+        const WORKSHEET_COUNT = 20; // 4 columns * 5 rows
+
+        function setupEventListeners() {
+            document.getElementById('new-worksheet-btn').addEventListener('click', generateWorksheet);
+        } 
+
+        const initializeFirebase = async () => {
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                
+                userId = auth.currentUser?.uid || 'guest-user';
+                isAuthReady = true;
+
+                document.getElementById('user-info').classList.add('hidden');
+                
+                showMessage("શરૂ કરવા માટે 'નવી વર્કશીટ જનરેટ કરો' બટન દબાવો.", 'bg-orange-100 text-orange-700');
+                setupEventListeners();
+
+            } catch (error) {
+                console.error("Error initializing Firebase/Auth:", error);
+                isAuthReady = true;
+                userId = crypto.randomUUID();
+                document.getElementById('user-info').classList.add('hidden');
+                showMessage("શરૂ કરવા માટે 'નવી વર્કશીટ જનરેટ કરો' બટન દબાવો.", 'bg-orange-100 text-orange-700');
+                
+                setupEventListeners();
+            }
+        };
+
+        /**
+         * Division Problem Generation Logic 
+         * Ensures perfectly divisible problems without remainders
+         */
+        function generateProblem(digits) {
+            let divisor, answer, dividend;
+            
+            if (digits === 1) {
+                // 1 digit answer, 1 digit divisor (e.g. 72 / 8 = 9)
+                divisor = Math.floor(Math.random() * 8) + 2; // 2 to 9
+                answer = Math.floor(Math.random() * 8) + 2; // 2 to 9
+            } else if (digits === 2) {
+                // 2 digit answer, 1 digit divisor (e.g. 144 / 6 = 24)
+                divisor = Math.floor(Math.random() * 8) + 2; // 2 to 9
+                answer = Math.floor(Math.random() * 90) + 10; // 10 to 99
+            } else if (digits === 3) {
+                // 3 digit answer, 1 or 2 digit divisor (e.g. 2400 / 12 = 200)
+                divisor = Math.floor(Math.random() * 14) + 2; // 2 to 15
+                answer = Math.floor(Math.random() * 900) + 100; // 100 to 999
+            } else {
+                divisor = Math.floor(Math.random() * 8) + 2;
+                answer = Math.floor(Math.random() * 90) + 10;
+            }
+
+            // Calculate dividend so that division is always perfect
+            dividend = divisor * answer;
+            
+            return { num1: dividend, num2: divisor, answer: answer, userInput: '' };
+        }
+
+        /**
+         * Generates and Renders the Worksheet
+         */
+        function generateWorksheet() {
+            const digitSelect = parseInt(document.getElementById('digit-select').value);
+            currentProblems = Array.from({ length: WORKSHEET_COUNT }, () => generateProblem(digitSelect));
+            renderWorksheet();
+            showMessage("નવી વર્કશીટ જનરેટ થઈ ગઈ છે! હવે જવાબો લખો.", 'bg-blue-100 text-blue-700');
+        }
+
+        /**
+         * Renders the currentProblems array into the DOM
+         */
+        function renderWorksheet() {
+            const grid = document.getElementById('worksheet-grid');
+            grid.innerHTML = ''; 
+
+            currentProblems.forEach((problem, index) => {
+                const box = document.createElement('div');
+                box.className = 'problem-box';
+                box.dataset.index = index;
+
+                box.innerHTML = `
+                    <div class="problem-alignment-container">
+                        <div class="number-row text-right">${problem.num1}</div>
+                        <div class="operator-row">
+                            <span class="divide-sign">&divide;</span> 
+                            <span class="number-row">${problem.num2}</span>
+                        </div>
+                        <div class="line"></div>
+                    </div>
+                    <input type="number"
+                            class="answer-input"
+                            placeholder="?"
+                            value="${problem.userInput}"
+                            data-index="${index}"
+                            min="0"
+                           oninput="this.value = this.value.slice(0, 7);">`;
+                grid.appendChild(box);
+            });
+
+            document.querySelectorAll('.answer-input').forEach(input => {
+                input.addEventListener('input', handleInputChange);
+            });
+        }
+
+        function checkSingleAnswer(index, userInput) {
+            const problem = currentProblems[index];
+            const isCorrect = parseInt(userInput) === problem.answer;
+            const inputElement = document.querySelector(`.answer-input[data-index="${index}"]`);
+
+            if (inputElement) {
+                if (userInput.trim() === '') {
+                    inputElement.style.borderColor = '#ccc'; 
+                } else if (isCorrect) {
+                    inputElement.style.borderColor = '#10B981'; 
+                } else {
+                    inputElement.style.borderColor = '#EF4444'; 
+                }
+            }
+        }
+
+        function isWorksheetComplete() {
+            return currentProblems.every(problem => problem.userInput && problem.userInput.trim() !== '');
+        }
+
+        function handleInputChange(event) {
+            const index = event.target.dataset.index;
+            const value = event.target.value.trim();
+            currentProblems[index].userInput = value;
+            
+            checkSingleAnswer(index, value);
+
+            document.getElementById('message-area').classList.add('hidden');
+            
+            if (isWorksheetComplete()) {
+                checkAnswers();
+            }
+        }
+
+        function checkAnswers() {
+            let correctCount = 0;
+            let totalProblems = currentProblems.length;
+
+            currentProblems.forEach((problem) => {
+                const userInput = parseInt(problem.userInput);
+                const isCorrect = userInput === problem.answer;
+                if (isCorrect) {
+                    correctCount++;
+                }
+            });
+
+            const score = Math.round((correctCount / totalProblems) * 100);
+
+            if (totalProblems === 0) { 
+                showMessage(`કૃપા કરીને પહેલા નવી વર્કશીટ જનરેટ કરો.`, 'bg-red-100 text-red-700');
+                return;
+            } else if (correctCount === totalProblems) {
+                showMessage(`અભિનંદન! તમામ ${totalProblems} દાખલાઓ સાચા છે!`, 'bg-yellow-100 text-yellow-700');
+            } else {
+                showMessage(`અંતિમ પરિણામ: ${totalProblems} માંથી ${correctCount} સાચા (${score}%)`, 'bg-red-100 text-red-700');
+            }
+        }
+
+        function showMessage(text, className) {
+            const messageArea = document.getElementById('message-area');
+            messageArea.textContent = text;
+            messageArea.className = `mt-6 p-4 text-center text-lg font-semibold rounded-lg ${className}`;
+            messageArea.classList.remove('hidden');
+        }
+        
+        // --- Initial Load ---
+        window.onload = initializeFirebase;
+    </script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ગુણાકાર વર્કશીટ - વદ્દી વગરના</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans Gujarati', sans-serif;
+            background-color: #f0fdfa; /* Teal-50 */
+        }
+
+        /* ઇનપુટ બોક્સમાંથી એરો (Arrows) હટાવવા માટે */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 text-gray-800">
+
+    <div class="max-w-6xl mx-auto bg-white p-6 md:p-8 rounded-3xl shadow-xl border border-gray-200">
+        
+        <!-- હેડર -->
+        <div class="w-full bg-teal-100 border-2 border-teal-300 rounded-2xl py-4 px-4 mb-8 text-center shadow-sm">
+            <h1 class="text-3xl md:text-4xl font-bold text-teal-900">ગુણાકાર વર્કશીટ (વદ્દી વગરના)</h1>
+            <p class="text-teal-800 mt-2 font-medium">૨, ૩ અને ૪ અંકના સાદા ગુણાકાર (૧ અંક સાથે)</p>
+        </div>
+
+        <!-- 20 દાખલાઓનું ગ્રીડ (Worksheet Layout) -->
+        <div id="worksheet-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-8 mb-8">
+            <!-- દાખલાઓ JavaScript દ્વારા અહી ઉમેરાશે -->
+        </div>
+
+        <!-- બટન અને સ્કોર -->
+        <div class="flex flex-col items-center space-y-6 mt-8 border-t-2 border-gray-100 pt-8">
+            <div id="score-display" class="text-3xl font-bold text-gray-700 h-10"></div>
+            
+            <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                <button onclick="checkAnswers()" class="px-10 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl text-2xl transition-all shadow-md w-full sm:w-auto">
+                    ચેક કરો ✔️
+                </button>
+                <button onclick="initWorksheet()" class="px-10 py-3 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl text-2xl transition-all shadow-md w-full sm:w-auto">
+                    નવી વર્કશીટ 🔄
+                </button>
+            </div>
+        </div>
+
+        <!-- ફૂટર (બનાવનારની માહિતી) -->
+        <div class="mt-12 text-center bg-gray-50 py-4 rounded-xl border border-gray-200">
+            <p class="text-gray-700 font-medium text-lg leading-relaxed">
+                created by: <span class="font-bold text-teal-800">વિજયકુમાર ચાવડા</span><br>
+                શાળા : <span class="font-bold text-teal-800">દાદાના મુવાડા પ્રા. શાળા</span>
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        let problems = [];
+
+        // વદ્દી વગરના ગુણાકાર જનરેટ કરવાનું ફંક્શન
+        function generateNoCarryMultiplication() {
+            // નીચેનો ગુણક 2 થી 4 સુધી રાખીએ જેથી ઉપરના અંકો 1 થી 4 સુધી આવી શકે
+            let m = Math.floor(Math.random() * 3) + 2; 
+            
+            // ઉપરની સંખ્યા ૨, ૩ અથવા ૪ અંકની
+            let digits = Math.floor(Math.random() * 3) + 2; 
+            
+            let numStr = '';
+            for (let i = 0; i < digits; i++) {
+                // મહત્તમ અંક એવો લેવો કે ગુણાકાર 9 થી ન વધે (વદ્દી ન આવે)
+                let maxDigit = Math.floor(9 / m);
+                // પ્રથમ અંક 0 ન હોવો જોઈએ
+                let minDigit = (i === 0) ? 1 : 0;
+                
+                let d = Math.floor(Math.random() * (maxDigit - minDigit + 1)) + minDigit;
+                numStr += d.toString();
+            }
+            
+            return { n1: numStr, n2: m.toString(), ans: parseInt(numStr) * m };
+        }
+
+        // વર્કશીટ લોડ કરવાનું ફંક્શન
+        function initWorksheet() {
+            const grid = document.getElementById('worksheet-grid');
+            grid.innerHTML = '';
+            problems = [];
+            document.getElementById('score-display').innerHTML = '';
+            
+            for (let i = 0; i < 20; i++) {
+                let p = generateNoCarryMultiplication();
+                problems.push(p);
+                
+                let cell = document.createElement('div');
+                cell.className = "flex flex-col items-end text-3xl md:text-4xl font-bold font-mono text-gray-800 bg-gray-50 p-4 rounded-xl shadow-sm border border-gray-200";
+                
+                cell.innerHTML = `
+                    <div class="tracking-[0.2em]">${p.n1}</div>
+                    <div class="flex justify-between w-full border-b-4 border-gray-800 pb-1 mb-3 mt-1">
+                        <span class="text-gray-500">×</span>
+                        <span class="tracking-[0.2em]">${p.n2}</span>
+                    </div>
+                    <input type="number" id="ans-${i}" class="w-full text-right bg-white border-2 border-gray-300 rounded-lg focus:outline-none focus:border-teal-500 tracking-[0.2em] p-2 h-14" autocomplete="off" placeholder="">
+                `;
+                grid.appendChild(cell);
+            }
+        }
+
+        // જવાબો ચેક કરવાનું ફંક્શન
+        function checkAnswers() {
+            let score = 0;
+            
+            for (let i = 0; i < 20; i++) {
+                let inputEl = document.getElementById(`ans-${i}`);
+                let userAns = parseInt(inputEl.value);
+                
+                // જૂના કલર ક્લાસ હટાવવા
+                inputEl.classList.remove('bg-white', 'border-gray-300', 'bg-green-100', 'border-green-500', 'text-green-700', 'bg-red-100', 'border-red-500', 'text-red-700');
+                
+                if (!isNaN(userAns) && userAns === problems[i].ans) {
+                    // સાચો જવાબ
+                    score++;
+                    inputEl.classList.add('bg-green-100', 'border-green-500', 'text-green-700');
+                } else {
+                    // ખોટો જવાબ અથવા ખાલી
+                    inputEl.classList.add('bg-red-100', 'border-red-500', 'text-red-700');
+                }
+            }
+            
+            // સ્કોર બતાવો
+            document.getElementById('score-display').innerHTML = `તમારો સ્કોર: <span class="text-4xl text-green-600">${score} / 20</span>`;
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        // પેજ લોડ થાય ત્યારે વર્કશીટ બનાવો
+        window.onload = initWorksheet;
+    </script>
+</body>
+</html>
