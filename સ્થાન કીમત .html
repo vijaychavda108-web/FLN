@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>સ્થાન કિંમત રમત</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        .game-container {
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+        .place-value-box {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .digit-cell {
+            color: white;
+            padding: 0.5rem 0.25rem;
+            font-size: 2.5rem;
+            font-weight: 800;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 40px;
+            flex-grow: 1;
+            margin-right: 2px;
+            border-radius: 0.5rem;
+        }
+        /* અંકોના બેકગ્રાઉન્ડ કલર */
+        .color-0 { background-color: #ef4444; } /* દસ લાખ */
+        .color-1 { background-color: #3b82f6; } /* લાખ */
+        .color-2 { background-color: #f97316; } /* દસ હજાર */
+        .color-3 { background-color: #10b981; } /* હજાર */
+        .color-4 { background-color: #fcd34d; } /* સો */
+        .color-5 { background-color: #8b5cf6; } /* દશક */
+        .color-6 { background-color: #ef4444; } /* એકમ */
+        
+        .input-group {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="text-3xl font-extrabold text-yellow-600 mb-4 bg-yellow-100 p-2 rounded-lg shadow-md inline-block">સ્થાન કિંમત</h1>
+        
+        <!-- પ્રશ્ન નંબર અને સ્કોર -->
+        <div id="statusInfo" class="hidden flex justify-between px-4 mb-4 text-lg font-bold text-gray-700">
+            <div>પ્રશ્ન: <span id="qCount">0</span>/15</div>
+            <div>સ્કોર: <span id="currentScore">0</span></div>
+        </div>
+
+        <p id="instruction" class="text-xl font-semibold text-gray-700 mb-6">
+            રમત શરૂ કરવા માટે "નવી રમત શરૂ કરો" બટન દબાવો.
+        </p>
+
+        <!-- સંખ્યા દર્શાવવા માટેનું બોક્સ -->
+        <div id="numberDisplay" class="place-value-box"></div>
+
+        <!-- પ્રશ્ન અને જવાબ આપવાની જગ્યા -->
+        <div id="gameArea" class="hidden">
+            <p id="questionText" class="text-2xl font-bold text-indigo-700 my-6"></p>
+            <div class="input-group">
+                <input type="number" id="answerInput" min="0" max="9" maxlength="1"
+                       class="w-20 p-3 text-center border-2 border-indigo-300 rounded-xl
+                              focus:ring-indigo-500 focus:border-indigo-500 text-2xl font-bold
+                              transition shadow-inner" placeholder="અંક">
+            </div>
+        </div>
+
+        <!-- સાચો કે ખોટો જવાબ બતાવવા માટે -->
+        <div id="result" class="mt-6 text-xl font-bold min-h-[50px]"></div>
+
+        <!-- છેલ્લે સ્કોર દર્શાવવા માટે -->
+        <div id="finalScoreArea" class="hidden mt-6 bg-indigo-100 p-6 rounded-xl shadow-inner">
+            <h2 class="text-3xl font-bold text-indigo-800 mb-2">રમત પૂર્ણ! 🏆</h2>
+            <p class="text-2xl mt-2">તમારો ફાઇનલ સ્કોર:</p>
+            <p class="text-4xl font-extrabold text-green-600 mt-2"><span id="finalScore"></span> / 15</p>
+        </div>
+
+        <!-- બટન -->
+        <button id="newGameButton" onclick="startQuiz()" class="mt-4 bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-xl shadow-xl transition transform hover:scale-105 active:scale-95">
+            નવી રમત શરૂ કરો
+        </button>
+
+        <!-- ક્રેડિટ્સ -->
+        <div class="mt-8 pt-4 border-t-2 border-gray-100 text-sm font-bold text-gray-600">
+            <p>created by: વિજયકુમાર ચાવડા</p>
+            <p class="text-blue-600">શાળા : દાદાના મુવાડા પ્રા શાળા</p>
+        </div>
+    </div>
+
+    <script>
+        const PLACE_VALUES = ['દસ લાખ', 'લાખ', 'દસ હજાર', 'હજાર', 'સો', 'દશક', 'એકમ'];
+        let currentNumber, correctDigit, correctPlaceValue;
+        let currentQuestion = 0;
+        let score = 0;
+        const maxQuestions = 15;
+        let gameActive = false;
+
+        const numberDisplay = document.getElementById('numberDisplay');
+        const instruction = document.getElementById('instruction');
+        const gameArea = document.getElementById('gameArea');
+        const questionText = document.getElementById('questionText');
+        const answerInput = document.getElementById('answerInput');
+        const resultDiv = document.getElementById('result');
+        const newGameButton = document.getElementById('newGameButton');
+        const statusInfo = document.getElementById('statusInfo');
+        const qCountDisplay = document.getElementById('qCount');
+        const currentScoreDisplay = document.getElementById('currentScore');
+        const finalScoreArea = document.getElementById('finalScoreArea');
+        const finalScoreDisplay = document.getElementById('finalScore');
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // નવી રમત શરૂ કરવા માટે
+        function startQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            finalScoreArea.classList.add('hidden');
+            statusInfo.classList.remove('hidden');
+            newGameButton.style.display = 'none';
+            instruction.textContent = 'ધ્યાનથી સંખ્યા જુઓ અને માંગેલ સ્થાનનો અંક દાખલ કરો:';
+            
+            updateStatus();
+            nextQuestion();
+        }
+
+        // નવો પ્રશ્ન લાવવા માટે
+        function nextQuestion() {
+            if (currentQuestion >= maxQuestions) {
+                endQuiz();
+                return;
+            }
+
+            currentQuestion++;
+            updateStatus();
+            
+            const number = getRandomInt(1000000, 9999999);
+            currentNumber = number.toString();
+            const positionIndex = getRandomInt(0, 6);
+            
+            correctDigit = currentNumber[positionIndex];
+            correctPlaceValue = PLACE_VALUES[positionIndex];
+
+            resultDiv.innerHTML = '';
+            answerInput.value = '';
+            answerInput.disabled = false;
+            gameArea.classList.remove('hidden');
+            answerInput.focus();
+            gameActive = true;
+
+            displayNumber();
+            updateQuestionText();
+        }
+
+        // સંખ્યાને કલર બોક્સમાં બતાવવા
+        function displayNumber() {
+            let html = '';
+            const digits = currentNumber.split('');
+            digits.forEach((digit, index) => {
+                html += `<div class="digit-cell color-${index}">${digit}</div>`;
+            });
+            numberDisplay.innerHTML = html;
+        }
+
+        // ભારતીય સંખ્યા પદ્ધતિ મુજબ અલ્પવિરામ (,) મૂકવા
+        function formatIndianNumber(numStr) {
+            let parts = numStr.split('.');
+            let integerPart = parts[0];
+            if (integerPart.length > 3) {
+                let lastThree = integerPart.substring(integerPart.length - 3);
+                let rest = integerPart.substring(0, integerPart.length - 3);
+                let formattedRest = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ",");
+                integerPart = formattedRest + "," + lastThree;
+            }
+            return integerPart + (parts.length > 1 ? "." + parts[1] : "");
+        }
+
+        // પ્રશ્નનું લખાણ બદલવા
+        function updateQuestionText() {
+            const formattedNumber = formatIndianNumber(currentNumber);
+            questionText.innerHTML = `સંખ્યા ${formattedNumber} માં, <span class="text-yellow-600 bg-yellow-100 px-2 rounded">${correctPlaceValue}</span> ના સ્થાને કયો અંક છે?`;
+        }
+
+        // સ્કોર બોર્ડ અપડેટ કરવા
+        function updateStatus() {
+            qCountDisplay.textContent = currentQuestion;
+            currentScoreDisplay.textContent = score;
+        }
+
+        // જવાબ ચેક કરવા
+        function checkAnswer() {
+            if (!gameActive) return;
+            
+            const userAnswer = answerInput.value.trim();
+            if (!userAnswer) return;
+
+            // જો કોઈ એક કરતાં વધુ આંકડા નાખે તો છેલ્લો આંકડો જ લેશે
+            if (userAnswer.length > 1) {
+                answerInput.value = userAnswer.slice(-1);
+                return;
+            }
+
+            gameActive = false;
+            answerInput.disabled = true;
+
+            if (userAnswer === correctDigit) {
+                score++;
+                resultDiv.innerHTML = '<span class="text-green-600 text-3xl">🎉 સાચો જવાબ!</span>';
+            } else {
+                resultDiv.innerHTML = `<span class="text-red-600 text-3xl">❌ ખોટો જવાબ!</span><br>
+                                       <span class="text-gray-700 text-xl mt-2">સાચો અંક <b>${correctDigit}</b> હતો.</span>`;
+            }
+
+            updateStatus();
+
+            // ૧.૫ સેકન્ડ રાહ જોઈને આપમેળે નવો પ્રશ્ન લાવશે (૧૫૦૦ મિલિસેકન્ડ)
+            setTimeout(() => {
+                nextQuestion();
+            }, 1500);
+        }
+
+        // અંક ટાઈપ થતા જ ચેક થઈ જશે (કોઈ એન્ટર બટન દબાવવાની જરૂર નહિ)
+        answerInput.addEventListener('input', checkAnswer);
+
+        // પેજ લોડ થતા ડમી સંખ્યા બતાવવા
+        window.onload = function() {
+            currentNumber = '4762731';
+            displayNumber();
+            answerInput.disabled = true;
+        };
+
+        // ૧૫ પ્રશ્નો પછી ગેમ પૂરી કરવા
+        function endQuiz() {
+            gameArea.classList.add('hidden');
+            numberDisplay.innerHTML = '';
+            resultDiv.innerHTML = '';
+            statusInfo.classList.add('hidden');
+            instruction.textContent = 'તમારી રમત પૂરી થઈ ગઈ છે!';
+            
+            finalScoreArea.classList.remove('hidden');
+            finalScoreDisplay.textContent = score;
+            
+            newGameButton.style.display = 'inline-block';
+            newGameButton.textContent = 'ફરીથી રમો';
+        }
+    </script>
+</body>
+</html>
