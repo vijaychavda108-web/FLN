@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>વાચન અર્થગ્રહણ ગેમ</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Mukta+Vaani:wght@400;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Mukta Vaani', sans-serif;
+        }
+
+        body {
+            background-color: #e0f7fa;
+            background-image: radial-gradient(#b2ebf2 10%, transparent 10%), radial-gradient(#b2ebf2 10%, transparent 10%);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            background: #fff;
+            padding: 15px 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            border: 4px dashed #ff9800;
+        }
+
+        .header h1 {
+            color: #ff5722;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .credits {
+            margin-top: 5px;
+            font-size: 1.1rem;
+            color: #00796b;
+            font-weight: bold;
+        }
+
+        .game-container {
+            background: white;
+            max-width: 700px;
+            width: 100%;
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            text-align: center;
+            position: relative;
+            border: 5px solid #4caf50;
+        }
+
+        .progress {
+            font-size: 1.2rem;
+            color: #1976d2;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .paragraph-box {
+            background: #fff3e0;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            border-left: 6px solid #ff9800;
+            text-align: justify;
+        }
+
+        .question {
+            font-size: 1.5rem;
+            color: #d32f2f;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-btn {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            font-size: 1.3rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 0 #0d47a1;
+        }
+
+        .option-btn:hover {
+            background: #1976d2;
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #0d47a1;
+        }
+
+        .option-btn:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+
+        .feedback {
+            margin-top: 25px;
+            font-size: 2rem;
+            font-weight: bold;
+            min-height: 45px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .feedback.show {
+            opacity: 1;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); }
+            100% { transform: scale(1); }
+        }
+
+        .result-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .result-screen h2 {
+            font-size: 2.5rem;
+            color: #4caf50;
+            margin-bottom: 20px;
+        }
+
+        .result-screen p {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+        }
+
+        .restart-btn {
+            background: #ff5722;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #bf360c;
+        }
+
+        .restart-btn:hover {
+            background: #e64a19;
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #bf360c;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 { font-size: 2rem; }
+            .paragraph-box { font-size: 1.1rem; }
+            .question { font-size: 1.3rem; }
+            .option-btn { font-size: 1.1rem; }
+            .credits { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>વાચન અર્થગ્રહણ</h1>
+        <div class="credits">created by : વિજયકુમાર ચાવડા | શાળા : દાદાના મુવાડા પ્રા શાળા</div>
+    </div>
+
+    <div class="game-container" id="gameBox">
+        <div id="quizScreen">
+            <div class="progress" id="progressText">પ્રશ્ન 1 / 20</div>
+            <div class="paragraph-box" id="paragraphText">ફકરો અહી આવશે...</div>
+            <div class="question" id="questionText">પ્રશ્ન અહી આવશે?</div>
+            <div class="options" id="optionsBox">
+                <!-- Buttons will be generated here -->
+            </div>
+            <div class="feedback" id="feedbackText"></div>
+        </div>
+
+        <div class="result-screen" id="resultScreen">
+            <h2>રમત પૂર્ણ થઈ!</h2>
+            <p>તમારો સ્કોર: <span id="finalScore" style="color: #d32f2f; font-weight: bold;">0</span> / 20</p>
+            <button class="restart-btn" onclick="restartGame()">ફરીથી રમો</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsData = [
+            {
+                para: "સૂર્ય એક તારો છે. તે પૃથ્વીને પ્રકાશ અને ગરમી આપે છે. સૂર્ય વિના પૃથ્વી પર જીવન શક્ય નથી.",
+                question: "સૂર્ય પૃથ્વીને શું આપે છે?",
+                options: ["ઠંડક", "પ્રકાશ અને ગરમી", "વરસાદ"],
+                answer: 1
+            },
+            {
+                para: "સિંહ જંગલનો રાજા કહેવાય છે. તે ગુફામાં રહે છે અને શિકાર કરીને પોતાનું પેટ ભરે છે.",
+                question: "સિંહ ક્યાં રહે છે?",
+                options: ["માળામાં", "ઘરમાં", "ગુફામાં"],
+                answer: 2
+            },
+            {
+                para: "ભારત આપણો દેશ છે. ભારતની રાજધાની દિલ્હી છે. આપણો રાષ્ટ્રધ્વજ તિરંગો છે.",
+                question: "ભારતની રાજધાની કઈ છે?",
+                options: ["મુંબઈ", "દિલ્હી", "અમદાવાદ"],
+                answer: 1
+            },
+            {
+                para: "ગાય આપણને દૂધ આપે છે. દૂધમાંથી દહીં, છાશ, માખણ અને ઘી બને છે. ગાય એક પાલતુ પ્રાણી છે.",
+                question: "દૂધમાંથી શું બને છે?",
+                options: ["શાકભાજી", "માખણ", "ફળ"],
+                answer: 1
+            },
+            {
+                para: "મોર આપણું રાષ્ટ્રીય પક્ષી છે. તેના પીંછા રંગબેરંગી હોય છે. ચોમાસામાં મોર કળા કરીને નાચે છે.",
+                question: "મોર ક્યારે નાચે છે?",
+                options: ["શિયાળામાં", "ઉનાળામાં", "ચોમાસામાં"],
+                answer: 2
+            },
+            {
+                para: "ગુજરાતની સૌથી મોટી નદી નર્મદા છે. નર્મદા નદી પર સરદાર સરોવર ડેમ આવેલો છે.",
+                question: "ગુજરાતની સૌથી મોટી નદી કઈ છે?",
+                options: ["તાપી", "મહી", "નર્મદા"],
+                answer: 2
+            },
+            {
+                para: "વૃક્ષો આપણને ઓક્સિજન આપે છે. તે હવાને શુદ્ધ કરે છે અને વરસાદ લાવવામાં મદદ કરે છે.",
+                question: "વૃક્ષો આપણને કયો વાયુ આપે છે?",
+                options: ["કાર્બન ડાયોક્સાઈડ", "ઓક્સિજન", "નાઈટ્રોજન"],
+                answer: 1
+            },
+            {
+                para: "કાગડો કાળા રંગનો હોય છે. તે કા-કા અવાજ કરે છે. કાગડો ખૂબ ચતુર પક્ષી છે.",
+                question: "કાગડાનો રંગ કેવો હોય છે?",
+                options: ["કાળો", "સફેદ", "લાલ"],
+                answer: 0
+            },
+            {
+                para: "ગાંધીજીને આપણે 'રાષ્ટ્રપિતા' કહીએ છીએ. તેમનો જન્મ પોરબંદરમાં થયો હતો.",
+                question: "ગાંધીજીનો જન્મ ક્યાં થયો હતો?",
+                options: ["રાજકોટ", "અમદાવાદ", "પોરબંદર"],
+                answer: 2
+            },
+            {
+                para: "માછલી પાણીમાં રહે છે. તે ચૂઈ દ્વારા શ્વાસ લે છે. પાણી વિના માછલી જીવી શકતી નથી.",
+                question: "માછલી શેના દ્વારા શ્વાસ લે છે?",
+                options: ["નાક", "ફેફસાં", "ચૂઈ"],
+                answer: 2
+            },
+            {
+                para: "દિવાળી પ્રકાશનો તહેવાર છે. આ દિવસે લોકો દીવા પ્રગટાવે છે અને ફટાકડા ફોડે છે.",
+                question: "દિવાળી કેવો તહેવાર છે?",
+                options: ["રંગોનો", "પ્રકાશનો", "ઉત્તરાયણ"],
+                answer: 1
+            },
+            {
+                para: "આપણી પૃથ્વી ગોળ છે. પૃથ્વી પર જમીન અને પાણી બંને આવેલા છે. પૃથ્વી સૂર્યની આસપાસ ફરે છે.",
+                question: "પૃથ્વી કોની આસપાસ ફરે છે?",
+                options: ["ચંદ્ર", "સૂર્ય", "મંગળ"],
+                answer: 1
+            },
+            {
+                para: "પાણી આપણું જીવન છે. આપણે પાણીનો બગાડ ન કરવો જોઈએ. વરસાદ એ પાણીનો મુખ્ય સ્ત્રોત છે.",
+                question: "પાણીનો મુખ્ય સ્ત્રોત કયો છે?",
+                options: ["નદી", "કૂવો", "વરસાદ"],
+                answer: 2
+            },
+            {
+                para: "વાંદરો ઝાડ પર રહે છે. તેને કેળાં ખાવા ખૂબ ગમે છે. તે એક ડાળેથી બીજી ડાળે કૂદકા મારે છે.",
+                question: "વાંદરાને શું ખાવું ગમે છે?",
+                options: ["કેળાં", "સફરજન", "કેરી"],
+                answer: 0
+            },
+            {
+                para: "તાજમહેલ આગ્રામાં આવેલો છે. તે આરસપહાણમાંથી બનેલો છે. શાહજહાંએ તાજમહેલ બંધાવ્યો હતો.",
+                question: "તાજમહેલ કયા શહેરમાં આવેલો છે?",
+                options: ["દિલ્હી", "આગ્રા", "જયપુર"],
+                answer: 1
+            },
+            {
+                para: "મધમાખી મધપૂડો બનાવે છે. તે ફૂલોમાંથી રસ ચૂસીને મધ એકઠું કરે છે.",
+                question: "મધમાખી શું બનાવે છે?",
+                options: ["માળો", "દર", "મધપૂડો"],
+                answer: 2
+            },
+            {
+                para: "શિયાળામાં ખૂબ ઠંડી પડે છે. લોકો ગરમ કપડાં પહેરે છે અને તાપણું કરે છે.",
+                question: "લોકો ગરમ કપડાં કઈ ઋતુમાં પહેરે છે?",
+                options: ["શિયાળો", "ઉનાળો", "ચોમાસું"],
+                answer: 0
+            },
+            {
+                para: "15મી ઓગસ્ટ આપણો સ્વાતંત્ર્ય દિવસ છે. આ દિવસે આપણો દેશ આઝાદ થયો હતો.",
+                question: "આપણો દેશ ક્યારે આઝાદ થયો હતો?",
+                options: ["26 જાન્યુઆરી", "15 ઓગસ્ટ", "2 ઓક્ટોબર"],
+                answer: 1
+            },
+            {
+                para: "કમળ આપણું રાષ્ટ્રીય ફૂલ છે. તે કાદવમાં ખીલે છે. તેના પાંદડા મોટા હોય છે.",
+                question: "આપણું રાષ્ટ્રીય ફૂલ કયું છે?",
+                options: ["ગુલાબ", "ગલગોટો", "કમળ"],
+                answer: 2
+            },
+            {
+                para: "હાથી સૌથી મોટું જમીન પર રહેતું પ્રાણી છે. તેને લાંબી સૂંઢ અને મોટા કાન હોય છે.",
+                question: "હાથીના કાન કેવા હોય છે?",
+                options: ["નાના", "મોટા", "લાંબા"],
+                answer: 1
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let canClick = true;
+
+        const progressText = document.getElementById("progressText");
+        const paragraphText = document.getElementById("paragraphText");
+        const questionText = document.getElementById("questionText");
+        const optionsBox = document.getElementById("optionsBox");
+        const feedbackText = document.getElementById("feedbackText");
+        const quizScreen = document.getElementById("quizScreen");
+        const resultScreen = document.getElementById("resultScreen");
+        const finalScore = document.getElementById("finalScore");
+
+        function loadQuestion() {
+            canClick = true;
+            feedbackText.className = "feedback"; 
+            feedbackText.innerHTML = "";
+
+            const qData = questionsData[currentQuestion];
+            progressText.innerText = `પ્રશ્ન ${currentQuestion + 1} / ${questionsData.length}`;
+            paragraphText.innerText = qData.para;
+            questionText.innerText = qData.question;
+
+            optionsBox.innerHTML = "";
+            qData.options.forEach((opt, index) => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(index, btn);
+                optionsBox.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIndex, btnElement) {
+            if (!canClick) return;
+            canClick = false; 
+
+            const correctIndex = questionsData[currentQuestion].answer;
+
+            if (selectedIndex === correctIndex) {
+                score++;
+                btnElement.style.background = "#4caf50";
+                btnElement.style.boxShadow = "0 5px 0 #2e7d32";
+                feedbackText.innerText = "ખૂબ સરસ!";
+                feedbackText.style.color = "#4caf50";
+            } else {
+                btnElement.style.background = "#f44336";
+                btnElement.style.boxShadow = "0 5px 0 #c62828";
+                feedbackText.innerText = "ખોટો જવાબ";
+                feedbackText.style.color = "#f44336";
+                
+                // Show correct answer automatically
+                const allBtns = optionsBox.getElementsByTagName("button");
+                allBtns[correctIndex].style.background = "#4caf50";
+                allBtns[correctIndex].style.boxShadow = "0 5px 0 #2e7d32";
+            }
+
+            feedbackText.classList.add("show");
+
+            setTimeout(() => {
+                currentQuestion++;
+                if (currentQuestion < questionsData.length) {
+                    loadQuestion();
+                } else {
+                    showResult();
+                }
+            }, 2000); // 2 સેકન્ડ પછી નવો પ્રશ્ન આવશે
+        }
+
+        function showResult() {
+            quizScreen.style.display = "none";
+            resultScreen.style.display = "block";
+            finalScore.innerText = score;
+        }
+
+        function restartGame() {
+            currentQuestion = 0;
+            score = 0;
+            quizScreen.style.display = "block";
+            resultScreen.style.display = "none";
+            loadQuestion();
+        }
+
+        // Start game on load
+        loadQuestion();
+    </script>
+</body>
+</html>
