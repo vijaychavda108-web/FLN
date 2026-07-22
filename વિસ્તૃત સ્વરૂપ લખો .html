@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>વિસ્તૃત સ્વરૂપ લખો</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0fdf4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        .game-container {
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            width: 100%;
+            max-width: 650px;
+            text-align: center;
+        }
+        .level-selector {
+            background-color: #f3f4f6;
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            display: inline-flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .digit-span {
+            display: inline-block;
+            margin: 0 4px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            color: white;
+            font-size: 3.5rem;
+            font-weight: 800;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        /* અંકો માટેના આકર્ષક કલર્સ */
+        .bg-color-0 { background-color: #3b82f6; } /* Blue */
+        .bg-color-1 { background-color: #ef4444; } /* Red */
+        .bg-color-2 { background-color: #10b981; } /* Green */
+        .bg-color-3 { background-color: #f97316; } /* Orange */
+        
+        /* ઇનપુટ બોક્સના બોર્ડર કલર્સ */
+        .border-color-0 { border-color: #3b82f6; color: #3b82f6; }
+        .border-color-1 { border-color: #ef4444; color: #ef4444; }
+        .border-color-2 { border-color: #10b981; color: #10b981; }
+        .border-color-3 { border-color: #f97316; color: #f97316; }
+
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container border-t-8 border-green-500">
+        <h1 class="text-3xl font-extrabold text-green-700 mb-4 bg-green-100 p-2 rounded-lg shadow-sm inline-block">વિસ્તૃત સ્વરૂપ બનાવો</h1>
+        
+        <br>
+        
+        <!-- લેવલ પસંદગી -->
+        <div class="level-selector shadow-inner">
+            <label for="levelSelect" class="font-bold text-gray-700">લેવલ પસંદ કરો:</label>
+            <select id="levelSelect" onchange="startGame()" class="p-2 border-2 border-green-400 rounded-lg font-bold text-green-700 focus:outline-none">
+                <option value="1">લેવલ 1 (સરળ - ૨ અંક)</option>
+                <option value="2" selected>લેવલ 2 (મધ્યમ - ૩ અંક)</option>
+                <option value="3">લેવલ 3 (અઘરું - ૪ અંક)</option>
+            </select>
+        </div>
+
+        <p class="text-lg font-semibold text-gray-600 mb-6">
+            આપેલી સંખ્યાનું સાચું વિસ્તૃત સ્વરૂપ નીચેના ખાનામાં લખો:
+        </p>
+
+        <!-- સંખ્યા બતાવવા માટે (દા.ત. 456) -->
+        <div id="numberDisplay" class="mb-8 flex justify-center items-center flex-wrap">
+            <!-- JavaScript દ્વારા અંકો અહીં આવશે -->
+        </div>
+
+        <!-- જવાબ લખવા માટેના ખાલી બોક્સ (દા.ત. [400] + [50] + [6]) -->
+        <div id="inputArea" class="flex flex-wrap justify-center items-center gap-2 md:gap-4 mb-6">
+            <!-- JavaScript દ્વારા ઇનપુટ બોક્સ અહીં આવશે -->
+        </div>
+
+        <!-- સાચું/ખોટું ચેક કરવા માટેનું બટન -->
+        <button id="checkBtn" onclick="checkAnswer()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-xl text-xl shadow-md transition transform hover:scale-105 mb-4">
+            જવાબ ચકાસો
+        </button>
+
+        <!-- પરિણામ બતાવવા માટે -->
+        <div id="result" class="text-2xl font-bold min-h-[50px] mb-4"></div>
+        
+        <!-- નવી રમત બટન -->
+        <button onclick="startGame()" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-xl text-xl shadow-xl transition transform hover:scale-105 active:scale-95">
+            નવો પ્રશ્ન લાવો
+        </button>
+        
+        <!-- તમારું નામ અને શાળા -->
+        <div class="mt-8 pt-4 border-t-2 border-gray-100 text-base font-bold text-gray-500">
+            <p>Created by: <span class="text-indigo-700">વિજયકુમાર ચાવડા</span></p>
+            <p>શાળા : <span class="text-orange-600">દાદાના મુવાડા પ્રા શાળા</span></p>
+        </div>
+    </div>
+
+    <script>
+        let currentNumberStr = '';
+        let correctParts = [];
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function startGame() {
+            const level = parseInt(document.getElementById('levelSelect').value);
+            
+            // લેવલ મુજબ રકમ જનરેટ કરવી
+            if (level === 1) {
+                currentNumberStr = getRandomInt(10, 99).toString();
+            } else if (level === 2) {
+                currentNumberStr = getRandomInt(100, 999).toString();
+            } else {
+                currentNumberStr = getRandomInt(1000, 9999).toString();
+            }
+
+            correctParts = [];
+            let multiplier = Math.pow(10, currentNumberStr.length - 1);
+
+            let numberHtml = '';
+            let inputHtml = '';
+
+            // સંખ્યાના અંકો અને જવાબના બોક્સ બનાવવા
+            for (let i = 0; i < currentNumberStr.length; i++) {
+                let digit = parseInt(currentNumberStr[i]);
+                let placeValue = digit * multiplier; // સ્થાન કિંમત (દા.ત. 4 * 100 = 400)
+                
+                correctParts.push(placeValue);
+                multiplier /= 10;
+
+                // પ્રશ્ન માટેના રંગીન બોક્સ
+                numberHtml += `<span class="digit-span bg-color-${i}">${digit}</span>`;
+
+                // જવાબ માટેના ખાલી બોક્સ
+                inputHtml += `<input type="number" id="part-${i}" 
+                                class="w-20 md:w-28 p-3 text-center border-4 rounded-xl text-2xl font-bold focus:outline-none focus:ring-4 border-color-${i} bg-gray-50 shadow-inner" 
+                                placeholder="?">`;
+                
+                // બે બોક્સ વચ્ચે સરવાળા (+) નું નિશાન
+                if (i < currentNumberStr.length - 1) {
+                    inputHtml += `<span class="text-4xl font-bold text-gray-400">+</span>`;
+                }
+            }
+
+            document.getElementById('numberDisplay').innerHTML = numberHtml;
+            document.getElementById('inputArea').innerHTML = inputHtml;
+            document.getElementById('result').innerHTML = '';
+            
+            document.getElementById('checkBtn').classList.remove('hidden');
+            document.getElementById('checkBtn').disabled = false;
+            document.getElementById('checkBtn').classList.remove('opacity-50');
+
+            // પહેલા બોક્સ પર ઓટોમેટિક કર્સર લઈ જવા
+            setTimeout(() => {
+                document.getElementById('part-0').focus();
+            }, 100);
+        }
+
+        function checkAnswer() {
+            let allCorrect = true;
+
+            for (let i = 0; i < correctParts.length; i++) {
+                let inputElement = document.getElementById(`part-${i}`);
+                let userInput = inputElement.value.trim();
+                let userValue = parseInt(userInput);
+
+                // જો ઇનપુટ ખાલી હોય અથવા જવાબ સાચા જવાબ સાથે મેચ ન થતો હોય
+                if (userInput === '' || userValue !== correctParts[i]) {
+                    allCorrect = false;
+                    inputElement.classList.add('bg-red-100');
+                    setTimeout(() => inputElement.classList.remove('bg-red-100'), 1000);
+                } else {
+                    inputElement.classList.add('bg-green-100');
+                }
+            }
+
+            const resultDiv = document.getElementById('result');
+            
+            if (allCorrect) {
+                resultDiv.innerHTML = '<span class="text-green-600">🎉 એકદમ સાચો જવાબ!</span>';
+                
+                // બટન અને ઇનપુટ્સ લોક કરવા
+                document.getElementById('checkBtn').disabled = true;
+                document.getElementById('checkBtn').classList.add('opacity-50');
+                
+                for (let i = 0; i < correctParts.length; i++) {
+                    document.getElementById(`part-${i}`).disabled = true;
+                }
+            } else {
+                resultDiv.innerHTML = '<span class="text-red-600">❌ કોઈક ભૂલ છે, ફરીથી પ્રયાસ કરો!</span>';
+            }
+        }
+
+        // પેજ લોડ થાય ત્યારે ગેમ શરૂ કરો
+        window.onload = startGame;
+    </script>
+</body>
+</html>
