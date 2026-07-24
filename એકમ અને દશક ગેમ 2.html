@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>એકમ અને દશક - બોક્સ ગણો અને જવાબ લખો</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 750px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border: 3px solid #3498db;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .creator-info {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border: 1px solid #ffeeba;
+        }
+        .instruction {
+            font-size: 20px;
+            color: #e67e22;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .game-area {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 50px;
+            min-height: 200px;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            border: 2px dashed #bdc3c7;
+        }
+        .group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .group-label {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2980b9;
+        }
+        .blocks-container {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        /* દશકનું બોક્સ (10 નો ટાવર) */
+        .ten-block {
+            width: 35px;
+            height: 180px;
+            background-color: #3498db;
+            border: 2px solid #2c3e50;
+            display: flex;
+            flex-direction: column;
+            border-radius: 3px;
+        }
+        .ten-block div {
+            flex: 1;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+        }
+        .ten-block div:last-child {
+            border-bottom: none;
+        }
+        /* એકમનું બોક્સ (છૂટક) */
+        .unit-block {
+            width: 35px;
+            height: 35px;
+            background-color: #e74c3c;
+            border: 2px solid #c0392b;
+            border-radius: 3px;
+            margin-bottom: 5px;
+        }
+        .units-wrapper {
+            display: flex;
+            flex-wrap: wrap-reverse;
+            width: 150px;
+            gap: 5px;
+            justify-content: center;
+        }
+        
+        /* નવા ઇનપુટ બોક્સ માટે સ્ટાઇલ */
+        .input-area {
+            margin-top: 30px;
+        }
+        .input-row {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+        .input-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+        }
+        .input-box label {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .label-tens { color: #2980b9; }
+        .label-units { color: #c0392b; }
+
+        input[type="number"] {
+            font-size: 28px;
+            width: 80px;
+            text-align: center;
+            padding: 10px;
+            border: 3px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+            transition: 0.3s;
+        }
+        #tensAnswer { border-color: #3498db; }
+        #unitsAnswer { border-color: #e74c3c; }
+        
+        input[type="number"]:focus {
+            box-shadow: 0 0 8px rgba(46, 204, 113, 0.8);
+            border-color: #2ecc71 !important;
+        }
+        
+        .btn {
+            font-size: 22px;
+            padding: 12px 25px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn-check { background-color: #2ecc71; }
+        .btn-check:hover { background-color: #27ae60; }
+        .btn-next { background-color: #9b59b6; }
+        .btn-next:hover { background-color: #8e44ad; }
+        
+        #message {
+            font-size: 26px;
+            font-weight: bold;
+            height: 40px;
+            margin-top: 15px;
+        }
+        .score-board {
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #34495e;
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="creator-info">
+        Created by: વિજયકુમાર ચાવડા<br>
+        શાળા : દાદાના મુવાડા પ્રા. શાળા
+    </div>
+
+    <h1>એકમ અને દશક ની ઓળખ</h1>
+    <div class="score-board" id="scoreDisplay">સ્કોર: 0</div>
+    <div class="instruction">નીચે આપેલા દશક અને એકમના બોક્સ ગણો અને યોગ્ય ખાનામાં લખો</div>
+
+    <div class="game-area">
+        <div class="group">
+            <div class="group-label">દશક (Tens)</div>
+            <div class="blocks-container" id="tens-container">
+                <!-- દશકના બોક્સ અહીં આવશે -->
+            </div>
+        </div>
+        
+        <div class="group">
+            <div class="group-label">એકમ (Units)</div>
+            <div class="units-wrapper" id="units-container">
+                <!-- એકમના બોક્સ અહીં આવશે -->
+            </div>
+        </div>
+    </div>
+
+    <div class="input-area">
+        <div class="input-row">
+            <div class="input-box">
+                <label class="label-tens" for="tensAnswer">દશક કેટલા છે?</label>
+                <input type="number" id="tensAnswer" min="0" max="9" autocomplete="off">
+            </div>
+            <div class="input-box">
+                <label class="label-units" for="unitsAnswer">એકમ કેટલા છે?</label>
+                <input type="number" id="unitsAnswer" min="0" max="9" autocomplete="off">
+            </div>
+        </div>
+        <button class="btn btn-check" onclick="checkAnswer()">જવાબ ચકાસો</button>
+        <button class="btn btn-next" onclick="generateQuestion()">નવો પ્રશ્ન</button>
+    </div>
+
+    <div id="message"></div>
+</div>
+
+<script>
+    let actualTens = 0;
+    let actualUnits = 0;
+    let score = 0;
+
+    function generateQuestion() {
+        // 1 થી 99 વચ્ચેની કોઈ રેન્ડમ સંખ્યા બનાવો
+        let currentNumber = Math.floor(Math.random() * 99) + 1;
+        
+        actualTens = Math.floor(currentNumber / 10);
+        actualUnits = currentNumber % 10;
+
+        // દશકના ટાવર બનાવો (વાદળી રંગ)
+        let tensHtml = '';
+        for(let i = 0; i < actualTens; i++) {
+            tensHtml += `
+                <div class="ten-block">
+                    <div></div><div></div><div></div><div></div><div></div>
+                    <div></div><div></div><div></div><div></div><div></div>
+                </div>`;
+        }
+        // જો દશક 0 હોય તો ખાલી જગ્યા જાળવી રાખવા
+        document.getElementById('tens-container').innerHTML = tensHtml || '<div style="width:35px; height:180px;"></div>';
+
+        // એકમના છૂટક બોક્સ બનાવો (લાલ રંગ)
+        let unitsHtml = '';
+        for(let i = 0; i < actualUnits; i++) {
+            unitsHtml += `<div class="unit-block"></div>`;
+        }
+        document.getElementById('units-container').innerHTML = unitsHtml || '<div style="width:35px; height:35px;"></div>';
+
+        // બંને ઇનપુટ અને મેસેજ ખાલી કરો
+        document.getElementById('tensAnswer').value = '';
+        document.getElementById('unitsAnswer').value = '';
+        document.getElementById('message').innerText = '';
+        
+        // ફોકસ પહેલા દશકના ખાનામાં સેટ કરો
+        document.getElementById('tensAnswer').focus();
+    }
+
+    function checkAnswer() {
+        let userTensStr = document.getElementById('tensAnswer').value;
+        let userUnitsStr = document.getElementById('unitsAnswer').value;
+        let messageEl = document.getElementById('message');
+
+        // જો બંનેમાંથી કોઈ એક ખાનું ખાલી હોય
+        if(userTensStr === "" || userUnitsStr === "") {
+            messageEl.innerText = "કૃપા કરીને દશક અને એકમ બંને ખાનામાં જવાબ લખો!";
+            messageEl.style.color = "#e67e22";
+            return;
+        }
+
+        let userTens = parseInt(userTensStr);
+        let userUnits = parseInt(userUnitsStr);
+
+        // જવાબ ચેક કરો
+        if(userTens === actualTens && userUnits === actualUnits) {
+            messageEl.innerText = "🎉 ખૂબ સરસ! તમારો જવાબ બિલકુલ સાચો છે.";
+            messageEl.style.color = "green";
+            score += 10;
+            document.getElementById('scoreDisplay').innerText = "સ્કોર: " + score;
+            
+            // 2 સેકન્ડ પછી આપમેળે નવો પ્રશ્ન આવી જશે
+            setTimeout(generateQuestion, 2000);
+        } else {
+            messageEl.innerText = "❌ ખોટો જવાબ. ફરીથી ગણીને પ્રયત્ન કરો!";
+            messageEl.style.color = "red";
+        }
+    }
+
+    // એન્ટર (Enter) કી દબાવવાથી પણ જવાબ ચકાસી શકાશે
+    document.getElementById("tensAnswer").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            document.getElementById("unitsAnswer").focus(); // દશક લખીને એન્ટર મારે તો એકમ પર જાય 
+        }
+    });
+    
+    document.getElementById("unitsAnswer").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            checkAnswer();
+        }
+    });
+
+    // જ્યારે પેજ લોડ થાય ત્યારે પહેલો પ્રશ્ન બતાવો
+    window.onload = generateQuestion;
+</script>
+
+</body>
+</html>
